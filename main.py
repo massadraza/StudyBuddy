@@ -5,6 +5,8 @@ from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain
 
 # Load environment variables
 load_dotenv()
@@ -25,22 +27,27 @@ chunks = text_splitter.split_text(text)
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 vectorstore = FAISS.from_texts(chunks, embedding=embeddings)
 
-# Initialize the Chat LLM
-llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0)
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
 
-# Create RetrievalQA chain (works with the new version)
-qa_chain = RetrievalQA.from_chain_type(
-    llm=llm,
-    retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
-    chain_type="stuff"  # can also be "map_reduce" or "refine"
+memory = ConversationBufferMemory(
+    memory_key="chat_history",
+    return_messages=True,
+    output_key="answer"
 )
 
-# Interactive loop
+qa_chain = ConversationalRetrievalChain.from_llm(
+    llm=llm,
+    retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
+    memory=memory,
+    return_source_documents=True
+)
+
 print("Welcome to your AI Tutor! Type 'exit' to quit.")
 while True:
     query = input("\nAsk a question: ")
     if query.lower() in ["exit", "quit"]:
         print("Goodbye!")
         break
-    answer = qa_chain.run(query)
+    result = qa_chain({"question": query})
+    answer = result["answer"]
     print("\nAI Tutor:", answer)
