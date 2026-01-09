@@ -1,0 +1,46 @@
+import os
+from dotenv import load_dotenv
+from langchain.text_splitter import CharacterTextSplitter
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_community.chat_models import ChatOpenAI
+from langchain.chains import RetrievalQA
+
+# Load environment variables
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY not FOUND in env file")
+
+# Read the study guide text
+with open("study_guide.txt", "r", encoding="utf-8") as f:
+    text = f.read()
+
+# Split the text into chunks
+text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+chunks = text_splitter.split_text(text)
+
+# Create embeddings and vectorstore
+embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+vectorstore = FAISS.from_texts(chunks, embedding=embeddings)
+
+# Initialize the Chat LLM
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0)
+
+# Create RetrievalQA chain (works with the new version)
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
+    chain_type="stuff"  # can also be "map_reduce" or "refine"
+)
+
+# Interactive loop
+print("Welcome to your AI Tutor! Type 'exit' to quit.")
+while True:
+    query = input("\nAsk a question: ")
+    if query.lower() in ["exit", "quit"]:
+        print("Goodbye!")
+        break
+    answer = qa_chain.run(query)
+    print("\nAI Tutor:", answer)

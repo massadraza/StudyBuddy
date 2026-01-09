@@ -1,0 +1,65 @@
+# Study Guide: Introduction to Biology
+
+## Chapter 1: What is Biology?
+Biology is the scientific study of life. It encompasses the study of organisms, their structure, function, growth, evolution, and distribution. Biologists aim to understand the interactions between living things and their environments.
+
+### Key Concepts:
+- Organisms can be unicellular or multicellular.
+- Cells are the basic unit of life.
+- Life processes include metabolism, growth, reproduction, and response to stimuli.
+
+---
+
+## Chapter 2: Cell Structure and Function
+Cells are the smallest living units and are often called the "building blocks of life."
+
+### Types of Cells:
+1. **Prokaryotic Cells**: Simple, no nucleus, examples include bacteria and archaea.
+2. **Eukaryotic Cells**: Complex, with nucleus, examples include plant and animal cells.
+
+### Major Cell Organelles:
+- **Nucleus**: Contains DNA, controls cell activities.
+- **Mitochondria**: Produces energy through cellular respiration.
+- **Ribosomes**: Synthesizes proteins.
+- **Cell Membrane**: Controls what enters and leaves the cell.
+- **Chloroplasts**: Found in plant cells, performs photosynthesis.
+
+---
+
+## Chapter 3: Genetics
+Genetics is the study of heredity and variation in organisms.
+
+### Key Terms:
+- **DNA (Deoxyribonucleic Acid)**: Genetic material that carries information.
+- **Genes**: Segments of DNA that code for proteins.
+- **Alleles**: Different forms of a gene.
+- **Dominant vs. Recessive**: Dominant alleles mask recessive alleles in expression.
+- **Genotype**: Genetic makeup of an organism.
+- **Phenotype**: Observable traits.
+
+---
+
+## Chapter 4: Evolution
+Evolution explains how species change over time.
+
+### Key Points:
+- Natural selection is the process where organisms better adapted to their environment survive and reproduce.
+- Mutations in DNA can introduce variation.
+- Evolution leads to the diversity of life on Earth.
+
+---
+
+## Chapter 5: Ecology
+Ecology is the study of interactions between organisms and their environment.
+
+### Levels of Organization:
+- **Individual**: Single organism.
+- **Population**: Group of the same species.
+- **Community**: Different populations interacting.
+- **Ecosystem**: Community plus abiotic environment.
+- **Biosphere**: All ecosystems on Earth.
+
+### Key Concepts:
+- Energy flows from the sun through producers, consumers, and decomposers.
+- Food chains and food webs show these energy transfers.
+- Human activities can impact ecosystems through pollution, deforestation, and climate change.
