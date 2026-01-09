@@ -42,3 +42,18 @@ The system provides **personalized learning experiences** at scale while maintai
 
 The AI Tutor is organized into **layers of specialized agents** orchestrated by a central **LangGraph state machine**:
 
+
+### Key Points
+
+- **Planner Agent:** Decides lesson flow and teaching strategy.
+- **Retriever Agent:** Fetches reliable examples, definitions, and context.
+- **Tutor Agent:** Explains topics and generates analogies.
+- **Question Generator:** Produces adaptive exercises.
+- **Evaluator Agent:** Grades answers, updates mastery, detects misconceptions.
+- **Critic / Reflector:** Monitors output quality and triggers retries if necessary.
+- **LangGraph Core:** Orchestrates agent execution, manages state, supports loops, retries, and conditional paths.
+- **Feedback & Adaptation:** Adjusts lesson plan dynamically based on student performance.
+
+---
+
+> This architecture enables **adaptive, stateful, and explainable tutoring**, unlike a linear chain-based system.
