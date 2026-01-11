@@ -125,16 +125,25 @@ The AI Tutor uses a **LangGraph state machine** with conditional routing:
 
 ### Execution Flows
 
-#### Q&A Mode:
-```
-User question → Retriever → Router → Tutor → END
-```
+The router chooses which agent to run based on the `mode` field:
 
-#### Practice Mode:
+#### Q&A Mode (mode="qa"):
 ```
-1. Generation: "practice" → Retriever → Router → Question Generator → END
-2. Evaluation: Student answer → Retriever → Router → Evaluator → Topic Extractor → Mastery Tracker → END
+User asks "What is polymorphism?" → Retriever → Router → Tutor → END
 ```
+**No evaluation or mastery tracking** - just explanation with context.
+
+#### Practice Mode - Question Generation (mode="practice"):
+```
+User types "practice" → Retriever → Router → Question Generator → END
+```
+Returns a generated question and correct answer.
+
+#### Practice Mode - Answer Evaluation (mode="evaluate"):
+```
+User submits answer → Retriever → Router → Evaluator → Topic Extractor → Mastery Tracker → END
+```
+Grades answer, identifies topic, updates mastery scores.
 
 ---
 
