@@ -10,6 +10,7 @@ from .database import get_db
 from .models import database_models, schemas
 
 # Password hashing
+import bcrypt as _bcrypt  # Ensure bcrypt is imported before passlib uses it
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # OAuth2 scheme for token authentication
@@ -18,11 +19,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 # Password utilities
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain password against a hashed password"""
-    return pwd_context.verify(plain_password, hashed_password)
+    # Truncate to 72 bytes for bcrypt compatibility
+    password_bytes = plain_password.encode('utf-8')[:72]
+    return pwd_context.verify(password_bytes.decode('utf-8', errors='ignore'), hashed_password)
 
 def get_password_hash(password: str) -> str:
     """Hash a password"""
-    return pwd_context.hash(password)
+    # Truncate to 72 bytes for bcrypt compatibility
+    password_bytes = password.encode('utf-8')[:72]
+    return pwd_context.hash(password_bytes.decode('utf-8', errors='ignore'))
 
 # JWT token utilities
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
