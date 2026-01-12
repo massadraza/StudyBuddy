@@ -10,7 +10,7 @@ from ..agents.evaluator import evaluator_agent
 from ..agents.topic_extractor import topic_extractor_agent
 from ..agents.mastery_tracker import mastery_tracker_agent
 
-router = APIRouter(prefix="/api/practice", tags=["Practice"])
+router = APIRouter(prefix="/practice", tags=["Practice"])
 
 @router.post("/generate", response_model=schemas.PracticeQuestionResponse)
 def generate_question(

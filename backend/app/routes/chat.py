@@ -9,7 +9,7 @@ from ..agents.retriever import retriever_agent
 from ..agents.tutor import tutor_agent
 from langchain_core.messages import HumanMessage, AIMessage
 
-router = APIRouter(prefix="/api/chat", tags=["Chat"])
+router = APIRouter(prefix="/chat", tags=["Chat"])
 
 @router.post("/", response_model=schemas.ChatResponse)
 def chat(
