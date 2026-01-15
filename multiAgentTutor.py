@@ -13,7 +13,7 @@ from langgraph.graph import StateGraph, END
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0)
+llm = ChatOpenAI(model="gpt-4o", openai_api_key=OPENAI_API_KEY, temperature=0)
 
 # Define the State of the Graph
 class TutorState(TypedDict):
@@ -349,5 +349,4 @@ while True:
 
         print(f"\n Tutor: {result['answer']}")
 
-        chat_history = result.get("chat_history", chat_history)
-        
+        chat_history = result.get("chat_history", chat_history)    
