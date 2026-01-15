@@ -1,3 +1,5 @@
+# JWT Authentication
+
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
@@ -7,13 +9,13 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from .config import settings
 from .database import get_db
-from .models import database_models, schemas
+from .models import database_models
 
-# Password hashing
+# Password hashing 
 import bcrypt as _bcrypt  # Ensure bcrypt is imported before passlib uses it
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# OAuth2 scheme for token authentication
+# OAuth2 scheme for token authentication - how to find the token in a request
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 # Password utilities
@@ -85,3 +87,4 @@ async def get_current_user(
         raise credentials_exception
     
     return user
+
