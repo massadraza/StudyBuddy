@@ -105,6 +105,17 @@ class ApiService {
     return response.data;
   }
 
+  async getStudyGuideStatus(): Promise<{
+    has_study_guide: boolean;
+    user_id: number;
+    filename: string | null;
+    file_size: number | null;
+    word_count: number | null;
+  }> {
+    const response = await this.api.get('/study-guide/status');
+    return response.data;
+  }
+
   // Utility methods
   setToken(token: string) {
     localStorage.setItem('access_token', token);

@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, FileText, CheckCircle, XCircle, Loader, Brain, LogOut, MessageSquare, Target, TrendingUp } from 'lucide-react';
+import { Upload, FileText, CheckCircle, XCircle, Loader, Brain, LogOut, MessageSquare, Target, TrendingUp, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
+
+interface ExistingStudyGuide {
+  filename: string;
+  file_size: number;
+  word_count: number;
+}
 
 export default function StudyGuide() {
   const [file, setFile] = useState<File | null>(null);
@@ -11,7 +17,31 @@ export default function StudyGuide() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  const [existingGuide, setExistingGuide] = useState<ExistingStudyGuide | null>(null);
+  const [loadingStatus, setLoadingStatus] = useState(true);
+  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const status = await apiService.getStudyGuideStatus();
+        if (status.has_study_guide && status.filename) {
+          setExistingGuide({
+            filename: status.filename,
+            file_size: status.file_size || 0,
+            word_count: status.word_count || 0,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch study guide status:', err);
+      } finally {
+        setLoadingStatus(false);
+      }
+    };
+
+    fetchStatus();
+  }, []);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -33,6 +63,9 @@ export default function StudyGuide() {
       if (droppedFile.type === 'text/plain' || droppedFile.name.endsWith('.txt')) {
         setFile(droppedFile);
         setError('');
+        if (existingGuide) {
+          setShowReplaceConfirm(true);
+        }
       } else {
         setError('Please upload a .txt file');
       }
@@ -45,6 +78,9 @@ export default function StudyGuide() {
       if (selectedFile.type === 'text/plain' || selectedFile.name.endsWith('.txt')) {
         setFile(selectedFile);
         setError('');
+        if (existingGuide) {
+          setShowReplaceConfirm(true);
+        }
       } else {
         setError('Please upload a .txt file');
       }
@@ -57,6 +93,7 @@ export default function StudyGuide() {
     setUploading(true);
     setError('');
     setSuccess(false);
+    setShowReplaceConfirm(false);
 
     try {
       const formData = new FormData();
@@ -71,6 +108,12 @@ export default function StudyGuide() {
       setTimeout(() => {
         setProcessing(false);
         setSuccess(true);
+        // Update existing guide info
+        setExistingGuide({
+          filename: file.name,
+          file_size: file.size,
+          word_count: 0, // Will be updated on next page load
+        });
       }, 2000);
     } catch (err: any) {
       setUploading(false);
@@ -88,7 +131,22 @@ export default function StudyGuide() {
     setFile(null);
     setSuccess(false);
     setError('');
+    setShowReplaceConfirm(false);
   };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
+  if (loadingStatus) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -138,6 +196,51 @@ export default function StudyGuide() {
       {/* Content */}
       <div className="p-8">
         <div className="max-w-3xl mx-auto">
+          {/* Existing Study Guide Card */}
+          {existingGuide && !success && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl shadow-lg p-6 mb-6 border-2 border-green-200"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
+                    <CheckCircle className="text-green-600" size={28} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Current Study Guide</h3>
+                    <p className="text-lg font-medium text-gray-800">{existingGuide.filename}</p>
+                    <div className="flex gap-4 mt-1 text-sm text-gray-500">
+                      <span>{formatFileSize(existingGuide.file_size)}</span>
+                      {existingGuide.word_count > 0 && (
+                        <span>{existingGuide.word_count.toLocaleString()} words</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/chat')}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors"
+                  >
+                    Chat
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/practice')}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium text-sm hover:bg-purple-700 transition-colors"
+                  >
+                    Practice
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -147,10 +250,16 @@ export default function StudyGuide() {
               <>
                 <div className="text-center mb-8">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Upload className="text-white" size={32} />
+                    {existingGuide ? <RefreshCw className="text-white" size={32} /> : <Upload className="text-white" size={32} />}
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Study Guide</h2>
-                  <p className="text-gray-600">Upload a .txt file containing your study materials</p>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    {existingGuide ? 'Replace Study Guide' : 'Upload Study Guide'}
+                  </h2>
+                  <p className="text-gray-600">
+                    {existingGuide
+                      ? 'Upload a new .txt file to replace your current study guide'
+                      : 'Upload a .txt file containing your study materials'}
+                  </p>
                 </div>
 
                 {/* Upload Area */}
@@ -188,7 +297,7 @@ export default function StudyGuide() {
                       <FileText className="text-blue-600 mb-4" size={48} />
                       <p className="text-gray-900 font-semibold mb-1">{file.name}</p>
                       <p className="text-sm text-gray-500 mb-4">
-                        {(file.size / 1024).toFixed(2)} KB
+                        {formatFileSize(file.size)}
                       </p>
                       <button
                         onClick={resetUpload}
@@ -199,6 +308,33 @@ export default function StudyGuide() {
                     </div>
                   )}
                 </div>
+
+                {/* Replace Confirmation */}
+                {showReplaceConfirm && existingGuide && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl"
+                  >
+                    <p className="text-yellow-800 text-sm mb-3">
+                      This will replace your current study guide ({existingGuide.filename}). Your chat history and progress will remain, but they may no longer be relevant to the new content.
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleUpload}
+                        className="px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium text-sm hover:bg-yellow-700 transition-colors"
+                      >
+                        Yes, Replace
+                      </button>
+                      <button
+                        onClick={resetUpload}
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-300 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
 
                 {/* Error Message */}
                 {error && (
@@ -213,7 +349,7 @@ export default function StudyGuide() {
                 )}
 
                 {/* Upload Button */}
-                {file && !uploading && !processing && (
+                {file && !uploading && !processing && !showReplaceConfirm && (
                   <motion.button
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -264,19 +400,21 @@ export default function StudyGuide() {
                 )}
 
                 {/* Info Card */}
-                <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-4">
-                  <div className="flex gap-3">
-                    <FileText className="text-blue-600 flex-shrink-0" size={20} />
-                    <div>
-                      <p className="font-semibold text-blue-900 mb-1">What happens next?</p>
-                      <ul className="text-sm text-blue-800 space-y-1">
-                        <li>• Your study guide will be uploaded securely</li>
-                        <li>• AI will process and vectorize the content</li>
-                        <li>• You can then chat with your study guide and practice questions</li>
-                      </ul>
+                {!existingGuide && (
+                  <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div className="flex gap-3">
+                      <FileText className="text-blue-600 flex-shrink-0" size={20} />
+                      <div>
+                        <p className="font-semibold text-blue-900 mb-1">What happens next?</p>
+                        <ul className="text-sm text-blue-800 space-y-1">
+                          <li>Your study guide will be uploaded securely</li>
+                          <li>AI will process and vectorize the content</li>
+                          <li>You can then chat with your study guide and practice questions</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </>
             ) : (
               <motion.div
