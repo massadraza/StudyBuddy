@@ -10,15 +10,13 @@ from .routes import auth, chat, practice, progress, study_guide
 @asynccontextmanager
 async def app_lifespan(app: FastAPI):
     # Startup logic
-    print("Starting StudyBuddy API...")
+    print("Starting StudyBuddy Application...")
 
     # Initialize database tables
     print("Creating database tables...")
     create_tables()
     print("Database tables ready!")
-
     print("StudyBuddy API is ready!")
-    print("Note: Users must upload their own study guide before using chat/practice features.")
 
     yield  # app starts serving requests here
 
@@ -42,11 +40,11 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth.router)
-app.include_router(chat.router)
-app.include_router(practice.router)
-app.include_router(progress.router)
-app.include_router(study_guide.router)
+#app.include_router(auth.router)
+#app.include_router(chat.router)
+#app.include_router(practice.router)
+#app.include_router(progress.router)
+#app.include_router(study_guide.router)
 
 # Health check endpoint
 @app.get("/")

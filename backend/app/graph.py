@@ -15,7 +15,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
 from langgraph.graph import StateGraph, END
 from sqlalchemy.orm import Session
-
 from .config import settings
 from .models.database_models import MasteryScore
 
