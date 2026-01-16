@@ -16,7 +16,7 @@ from langgraph.graph import StateGraph, END
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-llm = ChatOpenAI(model="gpt-4o", openai_api_key=OPENAI_API_KEY, temperature=0)
+llm = ChatOpenAI(model="gpt-4o-mini", openai_api_key=OPENAI_API_KEY, temperature=0)
 
 # Define the State of the Graph
 class TutorState(TypedDict):
@@ -65,14 +65,34 @@ def tutor_agent(state: TutorState):
     """Provides examples and analogies"""
     question = state["question"]
     docs = state["retrieved_docs"]
+    chat_history = state.get("chat_history", [])
+
     context = "\n\n".join([doc.page_content for doc in docs])
+
+    # Format chat history for the prompt (last 10 messages to avoid token limits)
+    history_text = ""
+    if chat_history:
+        history_lines = []
+        for msg in chat_history[-10:]:
+            role = "Student" if isinstance(msg, HumanMessage) else "Tutor"
+            history_lines.append(f"{role}: {msg.content}")
+        history_text = "\n".join(history_lines)
+
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are a patient tutor. Explain concepts clearly with analogies.
-         Context from study guide: {context}"""), ("human", "{question}")
+
+Context from study guide:
+{context}
+
+Previous conversation:
+{history}
+
+Use the conversation history to understand references like "that", "it", "this", "repeat", etc."""),
+        ("human", "{question}")
     ])
 
     chain = prompt | llm
-    response = chain.invoke({"context": context, "question": question})
+    response = chain.invoke({"context": context, "question": question, "history": history_text})
 
     return {
         "answer": response.content,

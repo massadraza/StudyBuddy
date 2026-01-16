@@ -21,7 +21,7 @@ export default function StudyGuide() {
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     const fetchStatus = async () => {
       try {

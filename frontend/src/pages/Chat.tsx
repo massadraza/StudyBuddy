@@ -10,6 +10,7 @@ export default function Chat() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [conversationId, setConversationId] = useState<number | undefined>(undefined);
+  const [hasStudyGuide, setHasStudyGuide] = useState<boolean | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -20,6 +21,19 @@ export default function Chat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Check if user has uploaded a study guide
+  useEffect(() => {
+    const checkStudyGuide = async () => {
+      try {
+        const status = await apiService.getStudyGuideStatus();
+        setHasStudyGuide(status.has_study_guide);
+      } catch (err) {
+        setHasStudyGuide(false);
+      }
+    };
+    checkStudyGuide();
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -220,23 +234,41 @@ export default function Chat() {
       {/* Input area */}
       <div className="border-t bg-white/80 backdrop-blur-sm p-6">
         <div className="max-w-4xl mx-auto">
+          {hasStudyGuide === false && (
+            <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
+              <p className="text-amber-800">
+                Please upload a study guide to start chatting with the AI tutor.
+              </p>
+              <button
+                onClick={() => navigate('/study-guide')}
+                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
+              >
+                Upload Study Guide
+              </button>
+            </div>
+          )}
           <div className="flex gap-3">
             <div className="flex-1 relative">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask me anything..."
+                placeholder={hasStudyGuide === false ? "Upload a study guide to start..." : "Ask me anything..."}
                 rows={1}
-                className="w-full px-5 py-4 pr-12 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white shadow-sm"
+                disabled={hasStudyGuide === false}
+                className={`w-full px-5 py-4 pr-12 border rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none shadow-sm ${
+                  hasStudyGuide === false
+                    ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
+                    : 'bg-white border-gray-200'
+                }`}
                 style={{ minHeight: '56px', maxHeight: '200px' }}
               />
             </div>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: hasStudyGuide === false ? 1 : 1.05 }}
+              whileTap={{ scale: hasStudyGuide === false ? 1 : 0.95 }}
               onClick={handleSend}
-              disabled={!input.trim() || loading}
+              disabled={!input.trim() || loading || hasStudyGuide === false}
               className="px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
             >
               <Send size={20} />
