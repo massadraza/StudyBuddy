@@ -1,0 +1,270 @@
+# Computer Science Study Guide: Core Concepts
+
+## Chapter 1: Object-Oriented Programming (OOP)
+
+### What is OOP?
+Object-Oriented Programming is a programming paradigm based on the concept of "objects" which contain data (attributes) and code (methods). OOP helps organize code in a way that models real-world entities.
+
+### The Four Pillars of OOP:
+
+1. **Encapsulation**: Bundling data and methods that operate on that data within a single unit (class). It hides internal state and requires interaction through methods. Think of it like a capsule that protects the medicine inside.
+
+2. **Inheritance**: Creating new classes based on existing ones. The child class inherits attributes and methods from the parent class. This promotes code reuse. For example, a Car class can inherit from a Vehicle class.
+
+3. **Polymorphism**: The ability of objects to take on multiple forms. The same method name can behave differently based on the object calling it. Like how "draw()" works differently for Circle vs Rectangle objects.
+
+4. **Abstraction**: Hiding complex implementation details and showing only essential features. It's like driving a car - you use the steering wheel and pedals without knowing how the engine works internally.
+
+---
+
+## Chapter 2: Data Structures
+
+### Arrays
+Arrays are collections of elements stored in contiguous memory locations. Each element can be accessed by its index position. Arrays have fixed size and provide O(1) access time.
+
+### Linked Lists
+A linked list is a linear data structure where elements (nodes) are connected via pointers. Each node contains data and a reference to the next node. Unlike arrays, linked lists don't require contiguous memory and can grow dynamically.
+
+Types:
+- Singly Linked List: Each node points to the next node
+- Doubly Linked List: Each node points to both next and previous nodes
+- Circular Linked List: Last node points back to the first node
+
+### Stacks
+A Stack is a Last-In-First-Out (LIFO) data structure. Think of it like a stack of plates - you add and remove from the top. Key operations: push (add), pop (remove), peek (view top).
+
+Common uses: function call stack, undo mechanisms, expression evaluation.
+
+### Queues
+A Queue is a First-In-First-Out (FIFO) data structure. Like a line at a store - first person in line is served first. Key operations: enqueue (add to rear), dequeue (remove from front).
+
+### Trees
+A tree is a hierarchical data structure with a root node and child nodes. Each node can have zero or more children. Binary trees have at most 2 children per node.
+
+Binary Search Tree (BST): Left child < parent < right child. Provides O(log n) search time when balanced.
+
+### Hash Tables
+Hash tables store key-value pairs and use a hash function to compute an index into an array of buckets. They provide O(1) average-case lookup time. Collisions occur when different keys hash to the same index and can be resolved using chaining or open addressing.
+
+---
+
+## Chapter 3: Algorithms and Complexity
+
+### Time Complexity (Big O Notation)
+Big O describes how an algorithm's runtime grows as input size increases.
+
+Common complexities:
+- O(1): Constant time - array access by index
+- O(log n): Logarithmic - binary search
+- O(n): Linear - iterating through an array
+- O(n log n): Linearithmic - merge sort, quick sort
+- O(n²): Quadratic - nested loops, bubble sort
+- O(2^n): Exponential - recursive fibonacci
+
+### Sorting Algorithms
+
+**Bubble Sort**: Repeatedly compares adjacent elements and swaps them if in wrong order. Time: O(n²), Space: O(1). Simple but inefficient for large datasets.
+
+**Merge Sort**: Divide-and-conquer algorithm that splits array in half, recursively sorts each half, then merges them. Time: O(n log n), Space: O(n). Stable and predictable.
+
+**Quick Sort**: Picks a pivot element and partitions array around it. Recursively sorts partitions. Time: O(n log n) average, O(n²) worst case. Space: O(log n). Fast in practice.
+
+### Searching Algorithms
+
+**Linear Search**: Check each element sequentially until finding target. Time: O(n). Works on unsorted data.
+
+**Binary Search**: Only works on sorted arrays. Repeatedly divides search interval in half. Time: O(log n). Very efficient for large sorted datasets.
+
+---
+
+## Chapter 4: Design Patterns
+
+### Singleton Pattern
+Ensures a class has only one instance and provides a global point of access to it. Useful for database connections, logging, or configuration management.
+
+### Factory Pattern
+Creates objects without specifying the exact class to create. The factory method handles object instantiation based on input parameters. Promotes loose coupling.
+
+### Observer Pattern
+Defines a one-to-many dependency where when one object (subject) changes state, all dependents (observers) are notified automatically. Used in event handling systems.
+
+### Strategy Pattern
+Defines a family of algorithms, encapsulates each one, and makes them interchangeable. The algorithm can vary independently from clients that use it. Great for implementing different payment methods or sorting strategies.
+
+---
+
+## Chapter 5: Database Fundamentals
+
+### Relational Databases
+Store data in tables (relations) with rows (tuples) and columns (attributes). Tables can be related through foreign keys.
+
+### SQL Basics
+SQL (Structured Query Language) is used to interact with relational databases.
+
+Key operations:
+- SELECT: Retrieve data from tables
+- INSERT: Add new records
+- UPDATE: Modify existing records
+- DELETE: Remove records
+- JOIN: Combine rows from multiple tables based on related columns
+
+### Normalization
+Process of organizing data to reduce redundancy and improve data integrity.
+
+Forms:
+- 1NF: Eliminate repeating groups, each cell contains atomic values
+- 2NF: Remove partial dependencies on composite keys
+- 3NF: Remove transitive dependencies
+
+### Transactions and ACID
+ACID properties ensure database reliability:
+- Atomicity: All operations complete or none do
+- Consistency: Database remains in valid state
+- Isolation: Concurrent transactions don't interfere
+- Durability: Committed changes persist even after system failure
+
+---
+
+## Chapter 6: Computer Networks
+
+### OSI Model
+The 7-layer model for network communication:
+1. Physical: Hardware, cables, signals
+2. Data Link: MAC addresses, switches
+3. Network: IP addresses, routing
+4. Transport: TCP/UDP, ports
+5. Session: Connections, sessions
+6. Presentation: Encryption, compression
+7. Application: HTTP, FTP, SMTP
+
+### TCP vs UDP
+**TCP (Transmission Control Protocol)**: Connection-oriented, reliable, ordered delivery. Used for web browsing, email, file transfer. Slower due to overhead.
+
+**UDP (User Datagram Protocol)**: Connectionless, unreliable, no guaranteed delivery. Used for streaming, gaming, DNS. Faster with less overhead.
+
+### HTTP and REST
+HTTP (Hypertext Transfer Protocol) is the foundation of web communication.
+
+REST (Representational State Transfer) is an architectural style for web APIs:
+- Uses HTTP methods: GET (retrieve), POST (create), PUT (update), DELETE (remove)
+- Stateless: each request contains all needed information
+- Resources identified by URLs
+
+---
+
+## Chapter 7: Software Engineering Practices
+
+### Version Control (Git)
+Git tracks changes to code over time. Key concepts:
+- Repository: Project folder tracked by Git
+- Commit: Snapshot of changes
+- Branch: Independent line of development
+- Merge: Combine branches
+- Pull Request: Propose changes for review
+
+### Agile Methodology
+Iterative development approach with short cycles (sprints). Key principles:
+- Deliver working software frequently
+- Welcome changing requirements
+- Daily collaboration between developers and stakeholders
+- Continuous improvement
+
+### Test-Driven Development (TDD)
+Write tests before writing code. Process: Write failing test → Write code to pass test → Refactor. Benefits include better design and fewer bugs.
+
+### Code Review
+Peer review of code changes before merging. Catches bugs, ensures quality, shares knowledge, and maintains consistent style.
+
+---
+
+## Chapter 8: Operating Systems
+
+### Processes and Threads
+**Process**: Independent program in execution with its own memory space. Heavy-weight, context switching is expensive.
+
+**Thread**: Lightweight unit of execution within a process. Threads share memory space, making communication easier but requiring synchronization.
+
+### Memory Management
+Operating systems manage RAM allocation and access.
+
+Concepts:
+- Virtual Memory: Uses disk space to extend RAM
+- Paging: Divides memory into fixed-size pages
+- Segmentation: Divides memory into variable-size segments
+- Memory Leak: Failure to release unused memory
+
+### Deadlock
+Occurs when processes wait indefinitely for resources held by each other. Four conditions must hold:
+1. Mutual Exclusion: Resources can't be shared
+2. Hold and Wait: Process holds resource while waiting for another
+3. No Preemption: Resources can't be forcibly taken
+4. Circular Wait: Circular chain of waiting processes
+
+Prevention: Break one of the four conditions.
+
+---
+
+## Chapter 9: Recursion
+
+### What is Recursion?
+A function that calls itself to solve smaller instances of the same problem. Every recursive function needs:
+1. Base case: Stopping condition
+2. Recursive case: Problem broken into smaller subproblems
+
+### Classic Examples
+
+**Factorial**: n! = n × (n-1)!
+Base case: 0! = 1
+Recursive: factorial(n) = n × factorial(n-1)
+
+**Fibonacci**: F(n) = F(n-1) + F(n-2)
+Base cases: F(0) = 0, F(1) = 1
+Generates sequence: 0, 1, 1, 2, 3, 5, 8, 13...
+
+**Tree Traversal**: Naturally recursive since trees are recursive structures.
+- Preorder: Root → Left → Right
+- Inorder: Left → Root → Right
+- Postorder: Left → Right → Root
+
+### Recursion vs Iteration
+Recursion is often more elegant but uses more memory (call stack). Iteration uses loops and is generally more efficient. Some problems (like tree traversal) are naturally recursive.
+
+---
+
+## Chapter 10: Concurrency and Parallelism
+
+### Concurrency
+Multiple tasks making progress without necessarily executing simultaneously. Like a chef switching between cooking multiple dishes. Improves responsiveness.
+
+### Parallelism
+Multiple tasks executing simultaneously on different cores/processors. Like multiple chefs cooking different dishes at the same time. Improves throughput.
+
+### Race Conditions
+Occurs when multiple threads access shared data simultaneously and at least one modifies it. Result depends on timing. Leads to unpredictable bugs.
+
+### Synchronization Mechanisms
+
+**Mutex (Mutual Exclusion)**: Lock that allows only one thread to access a resource at a time.
+
+**Semaphore**: Counter controlling access to resources. Binary semaphore = mutex. Counting semaphore allows N threads.
+
+**Deadlock Prevention**: Ensure proper lock ordering, use timeouts, avoid nested locks.
+
+---
+
+## Key Principles to Remember
+
+1. **DRY (Don't Repeat Yourself)**: Avoid code duplication. Extract common logic into reusable functions.
+
+2. **SOLID Principles**:
+   - Single Responsibility: Class should have one reason to change
+   - Open/Closed: Open for extension, closed for modification
+   - Liskov Substitution: Subtypes must be substitutable for base types
+   - Interface Segregation: Many specific interfaces better than one general
+   - Dependency Inversion: Depend on abstractions, not concretions
+
+3. **KISS (Keep It Simple, Stupid)**: Simplest solution is often the best. Avoid over-engineering.
+
+4. **YAGNI (You Aren't Gonna Need It)**: Don't add functionality until it's necessary.
+
+5. **Separation of Concerns**: Different aspects of program should be in separate modules.

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, Sparkles, CheckCircle, XCircle, ArrowRight, LogOut, MessageSquare, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,21 @@ export default function Practice() {
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [hasStudyGuide, setHasStudyGuide] = useState<boolean | null>(null);
   const navigate = useNavigate();
+
+  // Check if user has uploaded a study guide
+  useEffect(() => {
+    const checkStudyGuide = async () => {
+      try {
+        const status = await apiService.getStudyGuideStatus();
+        setHasStudyGuide(status.has_study_guide);
+      } catch (err) {
+        setHasStudyGuide(false);
+      }
+    };
+    checkStudyGuide();
+  }, []);
 
   const handleGenerateQuestion = async () => {
     if (!topic.trim()) return;
@@ -131,6 +145,20 @@ export default function Practice() {
                 <p className="text-gray-600">Choose a topic and test your understanding with AI-generated questions</p>
               </div>
 
+              {hasStudyGuide === false && (
+                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
+                  <p className="text-amber-800">
+                    Please upload a study guide to start practicing.
+                  </p>
+                  <button
+                    onClick={() => navigate('/study-guide')}
+                    className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
+                  >
+                    Upload Study Guide
+                  </button>
+                </div>
+              )}
+
               <div>
                 <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-2">
                   What topic would you like to practice?
@@ -140,17 +168,22 @@ export default function Practice() {
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleGenerateQuestion()}
-                  placeholder="e.g., Python, Calculus, World History"
-                  className="w-full px-5 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                  onKeyDown={(e) => e.key === 'Enter' && hasStudyGuide !== false && handleGenerateQuestion()}
+                  placeholder={hasStudyGuide === false ? "Upload a study guide to start..." : "e.g., Python, Calculus, World History"}
+                  disabled={hasStudyGuide === false}
+                  className={`w-full px-5 py-4 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm ${
+                    hasStudyGuide === false
+                      ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
+                      : 'border-gray-200'
+                  }`}
                 />
               </div>
 
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: hasStudyGuide === false ? 1 : 1.02 }}
+                whileTap={{ scale: hasStudyGuide === false ? 1 : 0.98 }}
                 onClick={handleGenerateQuestion}
-                disabled={!topic.trim() || loading}
+                disabled={!topic.trim() || loading || hasStudyGuide === false}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center justify-center gap-2"
               >
                 {loading ? (
