@@ -40,11 +40,11 @@ app.add_middleware(
 )
 
 # Include routers
-#app.include_router(auth.router)
-#app.include_router(chat.router)
-#app.include_router(practice.router)
-#app.include_router(progress.router)
-#app.include_router(study_guide.router)
+app.include_router(auth.router)
+app.include_router(chat.router)
+app.include_router(practice.router)
+app.include_router(progress.router)
+app.include_router(study_guide.router)
 
 # Health check endpoint
 @app.get("/")

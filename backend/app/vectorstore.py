@@ -48,6 +48,5 @@ class VectorStoreManager:
         vectorstore_path = UPLOAD_DIR / str(user_id) / "vectorstore"
         return vectorstore_path.exists()
 
-
 # Global instance
 vector_manager = VectorStoreManager()

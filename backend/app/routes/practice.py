@@ -6,6 +6,8 @@ from ..models import database_models, schemas
 from ..auth import get_current_user
 from ..vectorstore import vector_manager
 from ..graph import tutor_graph
+from datetime import timezone
+
 
 router = APIRouter(prefix="/practice", tags=["Practice"])
 
@@ -108,7 +110,7 @@ def submit_answer(
     practice_question.student_answer = request.student_answer
     practice_question.is_correct = result["is_correct"]
     practice_question.topic = result["current_topic"]
-    practice_question.answered_at = datetime.utcnow()
+    practice_question.answered_at = datetime.now(timezone.utc)
     db.commit()
 
     return {

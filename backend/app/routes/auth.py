@@ -10,6 +10,7 @@ from ..auth import (
     get_password_hash,
     get_current_user
 )
+
 from ..config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])

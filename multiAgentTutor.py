@@ -1,3 +1,6 @@
+# This file serves as a plan for the full stack application
+# The CLI (Command Line Interface) verison
+
 import os, json
 from typing import TypedDict, List, Annotated, Dict, Optional
 import operator

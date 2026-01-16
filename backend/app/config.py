@@ -4,7 +4,7 @@ from typing import List
 class Settings(BaseSettings):
     # OpenAI
     openai_api_key: str
-    
+ 
     # JWT
     secret_key: str
     algorithm: str
