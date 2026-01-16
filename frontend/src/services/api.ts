@@ -72,6 +72,12 @@ class ApiService {
     return response.data;
   }
 
+  async logout(): Promise<{ message: string }> {
+    const response = await this.api.post('/auth/logout');
+    this.removeToken();
+    return response.data;
+  }
+
   // Chat endpoints
   async sendMessage(chatRequest: ChatRequest): Promise<ChatResponse> {
     const response = await this.api.post<ChatResponse>('/chat', chatRequest);

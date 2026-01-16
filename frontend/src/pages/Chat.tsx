@@ -83,8 +83,13 @@ export default function Chat() {
     }
   };
 
-  const handleLogout = () => {
-    apiService.setToken('');
+  const handleLogout = async () => {
+    try {
+      await apiService.logout();
+    } catch (err) {
+      // Still logout even if API call fails
+      apiService.removeToken();
+    }
     navigate('/login');
   };
 
