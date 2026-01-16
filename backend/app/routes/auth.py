@@ -70,3 +70,30 @@ def login(
 def get_current_user_info(current_user: database_models.User = Depends(get_current_user)):
     """Get current user information"""
     return current_user
+
+
+@router.post("/logout")
+def logout(
+    current_user: database_models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Logout and clear user's chat history"""
+    # Get all conversations for this user
+    conversations = db.query(database_models.Conversation).filter(
+        database_models.Conversation.user_id == current_user.id
+    ).all()
+
+    # Delete all messages in those conversations
+    for conversation in conversations:
+        db.query(database_models.Message).filter(
+            database_models.Message.conversation_id == conversation.id
+        ).delete()
+
+    # Delete all conversations
+    db.query(database_models.Conversation).filter(
+        database_models.Conversation.user_id == current_user.id
+    ).delete()
+
+    db.commit()
+
+    return {"message": "Logged out successfully. Chat history cleared."}
