@@ -1,236 +1,280 @@
-# AI Tutor – Multi-Agent Adaptive Learning System
+# StudyBuddy - AI-Powered Multi-Agent Tutoring System
 
-## Overview
-
-**AI Tutor** is an intelligent, adaptive, multi-agent learning system built with **LangGraph** and **LangChain**. It simulates a human tutor by assessing student knowledge, providing explanations, generating practice questions, evaluating answers, tracking mastery, and adapting its teaching strategy based on student performance.
-
-The system provides **personalized learning experiences** at scale while maintaining **accuracy, consistency, and stateful interactions**.
-
----
-
-## Implementation Status
-
-### ✅ Phase 1 & 2: Core Tutoring System
-- Q&A Mode with RAG-powered explanations
-- Practice question generation
-- Answer evaluation with feedback
-- Conversation memory management
-
-### ✅ Phase 3: Mastery Tracking
-- Topic extraction and identification
-- Performance-based score tracking
-- Visual progress monitoring
-
----
+An intelligent, adaptive learning platform that uses **LangGraph** to orchestrate multiple AI agents for personalized tutoring. Upload your study materials and get explanations, practice questions, and track your mastery across topics.
 
 ## Features
 
-### Current Features (Implemented)
+- **Q&A Mode** - Ask questions about your study material and get detailed explanations with analogies
+- **Practice Mode** - Auto-generated quiz questions with intelligent answer evaluation
+- **Mastery Tracking** - Track your progress per topic with adaptive scoring
+- **Personal Study Guides** - Upload your own materials for customized learning
+- **Multi-Agent AI** - Six specialized agents working together via LangGraph
 
-#### Q&A Mode
-- Ask questions about your study material
-- Get detailed explanations with analogies
-- Context pulled from your personal study guide using RAG
-- Maintains conversation history for contextual responses
+## Tech Stack
 
-#### Practice Mode
-- Auto-generated practice questions from study material
-- Intelligent answer evaluation (handles paraphrasing and synonyms)
-- Immediate feedback with correct answer explanations
-- Topic-based mastery tracking
+### Backend
+- **FastAPI** - Python web framework
+- **LangGraph** - Multi-agent orchestration
+- **LangChain** - LLM framework
+- **OpenAI GPT-4o-mini** - Language model
+- **FAISS** - Vector database for semantic search
+- **SQLAlchemy** - ORM with SQLite
+- **JWT** - Authentication
 
-#### Mastery Tracking System
-- **Automatic topic identification** - Extracts key concepts from questions
-- **Performance scoring** - Tracks mastery per topic (0-100%)
-- **Visual progress bars** - See your strengths and weak areas
-- **Adaptive tracking** - Correct answers +10%, incorrect -15%
-- **Progress command** - Type `progress` to view all topic scores
-
-### Multi-Agent Architecture (Current)
-
-#### 1. **Retriever Agent**
-Performs semantic search in FAISS vector database to fetch relevant study material chunks.
-
-#### 2. **Tutor Agent**
-Provides clear explanations with analogies based on retrieved context. Uses conversational AI to maintain engagement.
-
-#### 3. **Question Generator Agent**
-Creates practice questions from study material. Generates both question and correct answer in structured format.
-
-#### 4. **Evaluator Agent**
-Grades student answers intelligently, accounting for paraphrasing and synonyms. Provides constructive feedback.
-
-#### 5. **Topic Extractor Agent** *(New in Phase 3)*
-Uses LLM to identify the main concept/topic from questions and context. Returns clean, short topic names for tracking.
-
-#### 6. **Mastery Tracker Agent** *(New in Phase 3)*
-Updates performance scores based on evaluation results. Adjusts scores by topic for granular progress tracking.
-
-### Stateful Interactions
-- Maintains **shared LangGraph state** across all agents
-- Tracks **chat history, retrieved documents, mastery scores**
-- **Persistent mastery tracking** across practice sessions
-- Supports **conditional routing** based on mode (Q&A, Practice, Evaluate)
-
-### Knowledge Integration
-- **RAG (Retrieval-Augmented Generation)** using FAISS vector store
-- OpenAI embeddings for semantic search
-- Custom study guide (currently: Computer Science fundamentals)
-- 500-character chunks with 50-character overlap for optimal retrieval
-
----
+### Frontend
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Tailwind CSS** - Styling
+- **Framer Motion** - Animations
 
 ## Architecture
 
-The AI Tutor uses a **LangGraph state machine** with conditional routing:
-
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         User Input                          │
+│                      React Frontend                          │
+│   Login • Chat • Practice • Progress • Study Guide Upload    │
+└───────────────────────────┬─────────────────────────────────┘
+                            │ HTTP/REST
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     FastAPI Backend                          │
+│              JWT Auth • Routes • Database                    │
 └───────────────────────────┬─────────────────────────────────┘
                             │
                             ▼
-                    ┌───────────────┐
-                    │   Retriever   │ (Always first)
-                    │     Agent     │
-                    └───────┬───────┘
-                            │
-                            ▼
-                    ┌───────────────┐
-                    │ Router/Decide │ (Based on mode)
-                    │     Node      │
-                    └───┬───┬───┬───┘
-                        │   │   │
-        ┌───────────────┘   │   └───────────────┐
-        │                   │                   │
-        ▼                   ▼                   ▼
-┌──────────��────┐   ┌───────────────┐   ┌───────────────┐
-│  Tutor Agent  │   │  Question Gen │   │  Evaluator    │
-│  (Q&A Mode)   │   │ (Practice)    │   │  Agent        │
-└───────┬───────┘   └───────┬───────┘   └───────┬───────┘
-        │                   │                   │
-        ▼                   │                   ▼
-      [END]                 │           ┌───────────────┐
-                            │           │ Topic Extract │
-                            │           └───────┬───────┘
-                            │                   │
-                            │                   ▼
-                            │           ┌───────────────┐
-                            │           │   Mastery     │
-                            │           │   Tracker     │
-                            │           └───────┬───────┘
-                            │                   │
-                            └───────────────────┴────────► [END]
+┌─────────────────────────────────────────────────────────────┐
+│                  LangGraph State Machine                     │
+│                                                              │
+│  ┌──────────┐                                                │
+│  │Retriever │ ──► Searches FAISS vector store                │
+│  └────┬─────┘                                                │
+│       │                                                      │
+│       ▼                                                      │
+│  ┌──────────┐     ┌─────────────┐     ┌───────────┐          │
+│  │  Tutor   │     │  Question   │     │ Evaluator │          │
+│  │  Agent   │     │  Generator  │     │   Agent   │          │
+│  └────┬─────┘     └──────┬──────┘     └─────┬─────┘          │
+│       │                  │                  │                │
+│       ▼                  ▼                  ▼                │
+│     [END]              [END]         ┌───────────┐           │
+│                                      │  Topic    │           │
+│                                      │ Extractor │           │
+│                                      └─────┬─────┘           │
+│                                            ▼                 │
+│                                      ┌───────────┐           │
+│                                      │  Mastery  │           │
+│                                      │  Tracker  │           │
+│                                      └─────┬─────┘           │
+│                                            ▼                 │
+│                                          [END]               │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Execution Flows
+### Agent Responsibilities
 
-The router chooses which agent to run based on the `mode` field:
+| Agent | Purpose |
+|-------|---------|
+| **Retriever** | Semantic search on user's vectorized study guide |
+| **Tutor** | Provides explanations with analogies and examples |
+| **Question Generator** | Creates practice questions from study material |
+| **Evaluator** | Grades answers (handles paraphrasing/synonyms) |
+| **Topic Extractor** | Identifies main concept from questions |
+| **Mastery Tracker** | Updates scores: correct +10%, incorrect -15% |
 
-#### Q&A Mode (mode="qa"):
+## Project Structure
+
 ```
-User asks "What is polymorphism?" → Retriever → Router → Tutor → END
+StudyBuddy/
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI app entry point
+│   │   ├── config.py            # Environment configuration
+│   │   ├── database.py          # SQLAlchemy setup
+│   │   ├── auth.py              # JWT authentication
+│   │   ├── vectorstore.py       # FAISS vector store manager
+│   │   ├── graph.py             # LangGraph multi-agent system
+│   │   ├── models/
+│   │   │   ├── database_models.py   # SQLAlchemy models
+│   │   │   └── schemas.py           # Pydantic schemas
+│   │   └── routes/
+│   │       ├── auth.py          # Login, register, user info
+│   │       ├── chat.py          # Q&A mode endpoint
+│   │       ├── practice.py      # Practice question & grading
+│   │       ├── progress.py      # Mastery score retrieval
+│   │       └── study_guide.py   # File upload & vectorization
+│   ├── requirements.txt
+│   └── .env
+├── frontend/
+│   ├── src/
+│   │   ├── pages/               # React page components
+│   │   ├── components/          # Reusable UI components
+│   │   ├── services/api.ts      # Axios HTTP client
+│   │   └── App.tsx              # Router setup
+│   ├── package.json
+│   └── .env
+├── multiAgentTutor.py           # Standalone CLI version
+└── study_guide.txt              # Sample study material
 ```
-**No evaluation or mastery tracking** - just explanation with context.
 
-#### Practice Mode - Question Generation (mode="practice"):
-```
-User types "practice" → Retriever → Router → Question Generator → END
-```
-Returns a generated question and correct answer.
+## Getting Started
 
-#### Practice Mode - Answer Evaluation (mode="evaluate"):
-```
-User submits answer → Retriever → Router → Evaluator → Topic Extractor → Mastery Tracker → END
-```
-Grades answer, identifies topic, updates mastery scores.
+### Prerequisites
 
----
+- Python 3.9+
+- Node.js 18+
+- OpenAI API key
 
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `<question>` | Ask any question about your study material (Q&A mode) |
-| `practice` | Get a randomly generated practice question |
-| `progress` | View your mastery levels for all topics |
-| `exit` or `quit` | Exit the tutor |
-
----
-
-## Example Usage
+### Backend Setup
 
 ```bash
-$ python multiAgentTutor.py
+cd backend
 
-Welcome to your Multi-Agent AI Tutor!
-Commands:
- - Ask any question for the Q&A mode
- - Type 'practice' to get a practice question
- - Type 'progress' to see your mastery levels
- - Type 'exit' to quit
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-You: What is polymorphism?
-[Retriever Agent] Searching for What is polymorphism?
+# Install dependencies
+pip install -r requirements.txt
 
-Tutor: Polymorphism is the ability of objects to take on multiple forms...
+# Configure environment
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
 
-You: practice
-[Retriever Agent] Searching for Generate a practice question from study guide
-[Router] Practice mode -> Question Generator
-Practice Question: What is the time complexity of binary search?
-
-Your answer: O(log n)
-[Retriever Agent] Searching for What is the time complexity of binary search?
-[Router] Evaluate mode -> Evaluator
-[Evaluator Agent] Checking your answer...
-[Topic Extractor] Identified topic: binary search
-[Mastery Tracker] ✅ binary search: 50% → 60%
-
-✅ Correct! Excellent! Binary search indeed has O(log n) time complexity...
-
-You: progress
-
-📊 Your Mastery Levels:
-
-  ⚠️  polymorphism       : █████░░░░░ 50%
-  ✅ binary search      : ██████░░░░ 60%
-
-You: exit
-Goodbye! Happy Studying!
+# Run the server
+uvicorn app.main:app --reload
 ```
 
----
+The API will be available at `http://localhost:8000`
 
-## State Schema
+### Frontend Setup
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Configure environment (optional)
+cp .env.example .env
+# Edit .env if your backend is not at localhost:8000
+
+# Run development server
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`
+
+### CLI Version (Standalone)
+
+For a quick demo without the web interface:
+
+```bash
+# From project root
+python multiAgentTutor.py
+```
+
+## Environment Variables
+
+### Backend (.env)
+
+```env
+OPENAI_API_KEY=your-openai-api-key
+SECRET_KEY=your-jwt-secret-key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+DATABASE_URL=sqlite:///./tutor.db
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+```
+
+### Frontend (.env)
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+## API Endpoints
+
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/register` | Create new user |
+| POST | `/auth/login` | Get JWT token |
+| GET | `/auth/me` | Current user info |
+
+### Chat (Q&A Mode)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/chat` | Send question, get tutor response |
+
+### Practice
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/practice/generate` | Generate a practice question |
+| POST | `/practice/submit` | Submit answer for grading |
+
+### Progress
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/progress` | Get mastery scores by topic |
+
+### Study Guide
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/study-guide/upload` | Upload .txt study material |
+| GET | `/study-guide/status` | Check upload status |
+
+## Database Schema
+
+| Table | Fields |
+|-------|--------|
+| **User** | id, email, hashed_password, full_name, has_study_guide |
+| **Conversation** | id, user_id, created_at |
+| **Message** | id, conversation_id, role, content, timestamp |
+| **MasteryScore** | id, user_id, topic, score |
+| **PracticeQuestion** | id, user_id, question, correct_answer, student_answer, is_correct |
+
+## How It Works
+
+### 1. Upload Study Guide
+User uploads a `.txt` file which gets:
+- Split into 1000-character chunks (200 overlap)
+- Converted to embeddings via OpenAI
+- Stored in FAISS vector database
+
+### 2. Q&A Mode
+```
+User Question → Retriever (FAISS search) → Tutor Agent → Response
+```
+
+### 3. Practice Mode
+```
+Generate: Retriever → Question Generator → Question + Answer
+Submit:   Retriever → Evaluator → Topic Extractor → Mastery Tracker → Feedback
+```
+
+### 4. State Management
+LangGraph maintains a `TutorState` that flows between agents:
 
 ```python
 class TutorState(TypedDict):
-    question: str                    # Current question/query
-    chat_history: List[BaseMessage]  # Conversation history (accumulates)
-    retrieved_docs: List             # FAISS search results
-    answer: str                      # Agent responses
-    mode: str                        # "qa" | "practice" | "evaluate"
-    generated_question: str          # Practice question
-    correct_answer: str              # Ground truth answer
-    student_answer: str              # User's response
-    is_correct: bool                 # Evaluation result
-    current_topic: str               # Identified topic/concept
-    mastery_scores: Dict[str, float] # Topic → score (0.0-1.0)
-    user_feedback: str               # Reserved for future phases
+    mode: str                    # "qa" | "practice" | "evaluate"
+    question: str
+    student_answer: Optional[str]
+    user_id: int
+    vectorstore: Any
+    db: Session
+    retrieved_docs: List[Document]
+    current_topic: str
+    generated_question: str
+    correct_answer: str
+    answer: str
+    is_correct: bool
+    feedback: str
+    new_mastery_score: float
+    chat_history: Annotated[List[BaseMessage], operator.add]
 ```
 
----
+## License
 
-## Technology Stack
-
-- **LangGraph** - State machine orchestration, conditional routing
-- **LangChain** - LLM chains, prompt templates, message handling
-- **OpenAI GPT** - Language model for all agents
-- **FAISS** - Vector database for semantic search
-- **OpenAI Embeddings** - Text embeddings for RAG
-- **Python 3.x** - Core implementation
-
----
-
-> This architecture enables **adaptive, stateful, and explainable tutoring** with granular progress tracking, unlike simple chain-based systems.
+MIT
