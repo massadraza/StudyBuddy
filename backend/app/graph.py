@@ -82,20 +82,35 @@ def tutor_node(state: TutorState) -> dict:
     """Provides explanations with examples and analogies."""
     question = state["question"]
     docs = state["retrieved_docs"]
+    chat_history = state.get("chat_history", [])
 
     context = "\n\n".join([doc.page_content for doc in docs])
+
+    # Format chat history for the prompt (last 10 messages to avoid token limits)
+    history_text = ""
+    if chat_history:
+        history_lines = []
+        for msg in chat_history[-10:]:
+            role = "Student" if isinstance(msg, HumanMessage) else "Tutor"
+            history_lines.append(f"{role}: {msg.content}")
+        history_text = "\n".join(history_lines)
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are a patient tutor. Explain concepts clearly with analogies and examples.
 Use the context from the study guide to provide accurate information.
 
 Context from study guide:
-{context}"""),
+{context}
+
+Previous conversation:
+{history}
+
+Use the conversation history to understand references like "that", "it", "this", "repeat", etc."""),
         ("human", "{question}")
     ])
 
     chain = prompt | llm_creative
-    response = chain.invoke({"context": context, "question": question})
+    response = chain.invoke({"context": context, "question": question, "history": history_text})
 
     print(f"[Tutor] Generated response")
 
