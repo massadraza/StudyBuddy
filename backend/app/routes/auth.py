@@ -25,17 +25,7 @@ If we didn't have dependency injection
 
 EXAMPLE:
 
-def get_users():
-    db = SessionLocal()
-    users = db.query(User).all()
-    db.close()
-    return users
 
-WITH DEPENDENCY INJECTION
-
-def get_users(db: Session = Depends(get_db)):
-    users = db.query(Users).all()
- 
 
 """
 
