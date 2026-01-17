@@ -35,7 +35,7 @@ WITH DEPENDENCY INJECTION
 
 def get_users(db: Session = Depends(get_db)):
     users = db.query(Users).all()
-    return users
+ 
 
 """
 
