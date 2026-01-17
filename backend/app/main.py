@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-
 from .config import settings
 from .database import create_tables
 from .routes import auth, chat, practice, progress, study_guide
@@ -14,7 +13,10 @@ async def app_lifespan(app: FastAPI):
 
     # Initialize database tables
     print("Creating database tables...")
+
+    # Creates tables if they do not exist
     create_tables()
+
     print("Database tables ready!")
     print("StudyBuddy API is ready!")
 
@@ -25,28 +27,28 @@ async def app_lifespan(app: FastAPI):
 # Initialize FastAPI app with lifespan
 app = FastAPI(
     title="StudyBuddy API",
-    description="AI-powered multi-agent tutoring system with mastery tracking",
-    version="1.0.0",
+    description="Full Stack Application Powered by LangChain/LangGraph",
+    version="1.1.1",
     lifespan=app_lifespan
 )
 
-# Configure CORS -- Security Protocol
+# Configure CORS -- Security Protocols
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"]
 )
 
-# Include routers
-app.include_router(auth.router)
+# Include routers 
+app.include_router(auth.router) 
 app.include_router(chat.router)
 app.include_router(practice.router)
 app.include_router(progress.router)
 app.include_router(study_guide.router)
 
-# Health check endpoint
+# Health check endpoint - local testing purposes
 @app.get("/")
 def read_root():
     return {

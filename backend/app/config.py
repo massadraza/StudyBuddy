@@ -19,8 +19,9 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
     
-    @property
+    @property # Converts a method into an attribute, fetching this attribute runs this function
     def cors_origins_list(self) -> List[str]:
         return [origin.strip() for origin in self.cors_origins.split(",")]
 
+# Create a single instance so it is only loaded once
 settings = Settings()

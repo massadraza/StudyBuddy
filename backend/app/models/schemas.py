@@ -2,6 +2,10 @@ from pydantic import BaseModel, EmailStr
 from typing import List, Dict, Optional
 from datetime import datetime
 
+# Using Pydantic for data validation
+# Will return a HTTP 422 if incorrect information is entered
+# HTTP 422 Error -> Unprocessable Entity
+
 # Auth Schemas
 class UserRegister(BaseModel):
     email: EmailStr
