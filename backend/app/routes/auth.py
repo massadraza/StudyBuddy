@@ -15,6 +15,30 @@ from ..config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+"""
+Using Dependency Injection --> Why would we use it?
+
+First of all, what is a dependency?
+- Anything that a route needs like a db session, auth, config val, cache
+
+If we didn't have dependency injection 
+
+EXAMPLE:
+
+def get_users():
+    db = SessionLocal()
+    users = db.query(User).all()
+    db.close()
+    return users
+
+WITH DEPENDENCY INJECTION
+
+def get_users(db: Session = Depends(get_db)):
+    users = db.query(Users).all()
+    return users
+
+"""
+
 @router.post("/register", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
 def register(user_data: schemas.UserRegister, db: Session = Depends(get_db)):
     """Register a new user"""
