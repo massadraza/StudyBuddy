@@ -25,8 +25,8 @@ async def app_lifespan(app: FastAPI):
 # Initialize FastAPI app with lifespan
 app = FastAPI(
     title="StudyBuddy API",
-    description="AI-powered multi-agent tutoring system with mastery tracking",
-    version="1.0.0",
+    description="Full Stack Application Powered by LangChain/LangGraph",
+    version="1.1.1",
     lifespan=app_lifespan
 )
 
@@ -35,16 +35,17 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "Origin","X-Requested-With"]
 )
 
 # Include routers
-app.include_router(auth.router)
+app.include_router(auth.router) 
 app.include_router(chat.router)
 app.include_router(practice.router)
 app.include_router(progress.router)
 app.include_router(study_guide.router)
+
 
 # Health check endpoint
 @app.get("/")
