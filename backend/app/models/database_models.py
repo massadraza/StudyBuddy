@@ -28,8 +28,8 @@ class Conversation(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(datetime.timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(datetime.timezone.utc), onupdate=datetime.now(datetime.timezone.utc))
     
     # Relationships
     user = relationship("User", back_populates="conversations")
@@ -43,7 +43,7 @@ class Message(Base):
     conversation_id = Column(Integer, ForeignKey("conversations.id"), nullable=False)
     role = Column(String, nullable=False)  # "human" or "ai"
     content = Column(Text, nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.now(datetime.timezone.utc))
     
     # Relationships
     conversation = relationship("Conversation", back_populates="messages")
@@ -56,7 +56,7 @@ class MasteryScore(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     topic = Column(String, nullable=False, index=True)
     score = Column(Float, nullable=False, default=0.5)  # 0.0 to 1.0
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.now(datetime.timezone.utc), onupdate=datetime.now(datetime.timezone.utc))
     
     # Relationships
     user = relationship("User", back_populates="mastery_scores")
@@ -77,7 +77,7 @@ class PracticeQuestion(Base):
     student_answer = Column(Text, nullable=True)
     is_correct = Column(Boolean, nullable=True)
     topic = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(datetime.timezone.utc))
     answered_at = Column(DateTime, nullable=True)
     
     # Relationships

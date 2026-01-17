@@ -37,6 +37,7 @@ def get_users(db: Session = Depends(get_db)):
     users = db.query(Users).all()
     return users
 
+Creates and closes DB Sessions
 """
 
 @router.post("/register", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
