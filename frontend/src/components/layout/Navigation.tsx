@@ -54,6 +54,17 @@ export default function Navigation() {
               >
                 Progress
               </Link>
+
+              <Link
+                to="/settings"
+                className={`px-3 py-2 rounded-lg font-medium transition ${
+                  isActive('/settings')
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Settings
+              </Link>
             </div>
           </div>
 

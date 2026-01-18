@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Upload, X } from 'lucide-react';
+import { FileText, Upload, X, Key } from 'lucide-react';
 import { apiService } from '../../services/api';
 
 interface ProtectedRouteProps {
@@ -11,31 +11,43 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const token = apiService.getToken();
   const location = useLocation();
-  const [showModal, setShowModal] = useState(false);
+  const [showStudyGuideModal, setShowStudyGuideModal] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkStudyGuideStatus = async () => {
+    const checkUserStatus = async () => {
       if (!token) {
         setLoading(false);
         return;
       }
 
       try {
-        const status = await apiService.getStudyGuideStatus();
+        // Check API key status first
+        const apiKeyStatus = await apiService.getApiKeyStatus();
 
-        // Show modal if user doesn't have a study guide and is not on study-guide page
-        if (!status.has_study_guide && location.pathname !== '/study-guide') {
-          setShowModal(true);
+        // Show API key modal if user doesn't have a key and is not on settings page
+        if (!apiKeyStatus.has_api_key && location.pathname !== '/settings') {
+          setShowApiKeyModal(true);
+          setLoading(false);
+          return;
+        }
+
+        // Then check study guide status
+        const studyGuideStatus = await apiService.getStudyGuideStatus();
+
+        // Show study guide modal if user doesn't have a study guide and is not on study-guide or settings page
+        if (!studyGuideStatus.has_study_guide && location.pathname !== '/study-guide' && location.pathname !== '/settings') {
+          setShowStudyGuideModal(true);
         }
       } catch (error) {
-        console.error('Failed to check study guide status:', error);
+        console.error('Failed to check user status:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    checkStudyGuideStatus();
+    checkUserStatus();
   }, [token, location.pathname]);
 
   if (!token) {
@@ -54,9 +66,68 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     <>
       {children}
 
+      {/* API Key Required Modal */}
+      <AnimatePresence>
+        {showApiKeyModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative"
+            >
+              {/* Icon */}
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Key className="text-white" size={32} />
+              </div>
+
+              {/* Content */}
+              <h2 className="text-2xl font-bold text-gray-900 text-center mb-3">
+                OpenAI API Key Required
+              </h2>
+              <p className="text-gray-600 text-center mb-6">
+                To use StudyBuddy, you need to provide your own OpenAI API key.
+                Your key is encrypted and stored securely.
+              </p>
+
+              {/* Info box */}
+              <div className="bg-amber-50 rounded-xl p-4 mb-6">
+                <p className="text-sm text-amber-800">
+                  Don't have an API key? Get one from{' '}
+                  <a
+                    href="https://platform.openai.com/api-keys"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-700 font-medium underline"
+                  >
+                    platform.openai.com
+                  </a>
+                </p>
+              </div>
+
+              {/* Action button */}
+              <motion.a
+                href="/settings"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                <Key size={20} />
+                <span>Add API Key</span>
+              </motion.a>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Study Guide Required Modal */}
       <AnimatePresence>
-        {showModal && (
+        {showStudyGuideModal && !showApiKeyModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -71,7 +142,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
             >
               {/* Close button */}
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowStudyGuideModal(false)}
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X size={24} />

@@ -24,10 +24,18 @@ class User(BaseModel):
     id: int
     email: str
     full_name: Optional[str]
+    has_openai_key: bool = False
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
+
+# API Key Schemas
+class ApiKeyRequest(BaseModel):
+    api_key: str
+
+class ApiKeyStatus(BaseModel):
+    has_api_key: bool
 
 # Chat Schemas (matches your TutorState)
 class ChatMessage(BaseModel):

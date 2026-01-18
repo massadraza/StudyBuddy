@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timezone
 from ..database import get_db
 from ..models import database_models, schemas
 from ..auth import get_current_user
 from ..vectorstore import vector_manager
 from ..graph import tutor_graph
-from datetime import timezone
+from ..encryption import decrypt_api_key
 
 
 router = APIRouter(prefix="/practice", tags=["Practice"])
@@ -19,6 +19,13 @@ def generate_question(
 ):
     """Generate a practice question from the study guide"""
 
+    # Check if user has set an OpenAI API key
+    if not current_user.encrypted_openai_key:
+        raise HTTPException(
+            status_code=403,
+            detail="Please set your OpenAI API key before using the practice feature"
+        )
+
     # Check if user has uploaded a study guide
     if not current_user.has_study_guide:
         raise HTTPException(
@@ -26,8 +33,11 @@ def generate_question(
             detail="Please upload a study guide before using the practice feature"
         )
 
+    # Decrypt the API key
+    openai_api_key = decrypt_api_key(current_user.encrypted_openai_key)
+
     # Get user's vectorstore
-    vectorstore = vector_manager.get_user_vectorstore(current_user.id)
+    vectorstore = vector_manager.get_user_vectorstore(current_user.id, openai_api_key)
 
     # Search query based on topic or general
     search_query = request.topic if request.topic else "Generate a practice question from study guide"
@@ -40,6 +50,7 @@ def generate_question(
         "user_id": current_user.id,
         "vectorstore": vectorstore,
         "db": db,
+        "openai_api_key": openai_api_key,
         "retrieved_docs": [],
         "current_topic": "",
         "generated_question": "",
@@ -50,7 +61,7 @@ def generate_question(
         "new_mastery_score": 0.0,
         "chat_history": []
     })
-    
+
     # Save practice question to database (without student answer yet)
     practice_question = database_models.PracticeQuestion(
         user_id=current_user.id,
@@ -75,6 +86,13 @@ def submit_answer(
 ):
     """Submit and evaluate a practice answer"""
 
+    # Check if user has set an OpenAI API key
+    if not current_user.encrypted_openai_key:
+        raise HTTPException(
+            status_code=403,
+            detail="Please set your OpenAI API key before using the practice feature"
+        )
+
     # Get the practice question
     practice_question = db.query(database_models.PracticeQuestion).filter(
         database_models.PracticeQuestion.id == request.question_id,
@@ -84,8 +102,11 @@ def submit_answer(
     if not practice_question:
         raise HTTPException(status_code=404, detail="Practice question not found")
 
+    # Decrypt the API key
+    openai_api_key = decrypt_api_key(current_user.encrypted_openai_key)
+
     # Get user's vectorstore
-    vectorstore = vector_manager.get_user_vectorstore(current_user.id)
+    vectorstore = vector_manager.get_user_vectorstore(current_user.id, openai_api_key)
 
     # Run the LangGraph workflow in evaluate mode
     result = tutor_graph.invoke({
@@ -95,6 +116,7 @@ def submit_answer(
         "user_id": current_user.id,
         "vectorstore": vectorstore,
         "db": db,
+        "openai_api_key": openai_api_key,
         "retrieved_docs": [],
         "current_topic": "",
         "generated_question": practice_question.question,

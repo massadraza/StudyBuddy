@@ -2,8 +2,8 @@ from pydantic_settings import BaseSettings
 from typing import List, Optional
 
 class Settings(BaseSettings):
-    # OpenAI
-    openai_api_key: str
+    # OpenAI (optional - users provide their own keys)
+    openai_api_key: Optional[str] = None
 
     # JWT
     secret_key: str

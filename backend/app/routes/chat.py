@@ -5,6 +5,7 @@ from ..models import database_models, schemas
 from ..auth import get_current_user
 from ..vectorstore import vector_manager
 from ..graph import tutor_graph
+from ..encryption import decrypt_api_key
 from langchain_core.messages import HumanMessage, AIMessage
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
@@ -17,12 +18,22 @@ def chat(
 ):
     """Q&A mode: Ask questions and get tutoring responses"""
 
+    # Check if user has set an OpenAI API key
+    if not current_user.encrypted_openai_key:
+        raise HTTPException(
+            status_code=403,
+            detail="Please set your OpenAI API key before using the chat feature"
+        )
+
     # Check if user has uploaded a study guide
     if not current_user.has_study_guide:
         raise HTTPException(
             status_code=403,
             detail="Please upload a study guide before using the chat feature"
         )
+
+    # Decrypt the API key
+    openai_api_key = decrypt_api_key(current_user.encrypted_openai_key)
 
     # Get or create conversation
     if request.conversation_id:
@@ -53,7 +64,7 @@ def chat(
             chat_history.append(AIMessage(content=msg.content))
 
     # Get user's vectorstore
-    vectorstore = vector_manager.get_user_vectorstore(current_user.id)
+    vectorstore = vector_manager.get_user_vectorstore(current_user.id, openai_api_key)
 
     # Run the LangGraph workflow in Q&A mode
     result = tutor_graph.invoke({
@@ -63,6 +74,7 @@ def chat(
         "user_id": current_user.id,
         "vectorstore": vectorstore,
         "db": db,
+        "openai_api_key": openai_api_key,
         "retrieved_docs": [],
         "current_topic": "",
         "generated_question": "",

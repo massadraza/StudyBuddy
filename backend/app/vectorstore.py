@@ -40,48 +40,47 @@ class VectorStoreManager:
     """Manages per-user vector stores in PostgreSQL with pgvector"""
 
     def __init__(self):
-        self.embeddings = OpenAIEmbeddings(openai_api_key=settings.openai_api_key)
         self.connection_string = settings.vector_connection
-        self._cache = {}  # Cache vectorstore instances by user_id
 
-    def _get_base_vectorstore(self) -> PGVector:
+    def _get_embeddings(self, openai_api_key: str) -> OpenAIEmbeddings:
+        """Get embeddings instance with the provided API key"""
+        return OpenAIEmbeddings(openai_api_key=openai_api_key)
+
+    def _get_base_vectorstore(self, openai_api_key: str) -> PGVector:
         """Get the base PGVector store connection"""
         return PGVector(
-            embeddings=self.embeddings,
+            embeddings=self._get_embeddings(openai_api_key),
             connection=self.connection_string,
             collection_name=COLLECTION_NAME,
             use_jsonb=True,
         )
 
-    def get_user_vectorstore(self, user_id: int) -> UserFilteredVectorStore:
+    def get_user_vectorstore(self, user_id: int, openai_api_key: str) -> UserFilteredVectorStore:
         """
         Return a vectorstore configured to filter by user_id.
         """
-        if user_id in self._cache:
-            return self._cache[user_id]
-
         # Check if user has documents
-        if not self.user_has_vectorstore(user_id):
+        if not self.user_has_vectorstore(user_id, openai_api_key):
             raise ValueError(
                 f"No study guide found for user {user_id}. "
                 "Please upload a study guide first."
             )
 
         # Create a wrapper that applies user_id filter
-        vectorstore = self._get_base_vectorstore()
+        vectorstore = self._get_base_vectorstore(openai_api_key)
         user_vectorstore = UserFilteredVectorStore(vectorstore, user_id)
 
-        self._cache[user_id] = user_vectorstore
         return user_vectorstore
 
     def add_documents_for_user(
         self,
         user_id: int,
         texts: List[str],
+        openai_api_key: str,
         metadatas: Optional[List[dict]] = None
     ) -> List[str]:
         """Add documents for a specific user"""
-        vectorstore = self._get_base_vectorstore()
+        vectorstore = self._get_base_vectorstore(openai_api_key)
 
         # Ensure user_id is in all metadata
         if metadatas is None:
@@ -93,28 +92,18 @@ class VectorStoreManager:
         # Add texts and return document IDs
         ids = vectorstore.add_texts(texts=texts, metadatas=metadatas)
 
-        # Clear cache for this user
-        self.clear_user_cache(user_id)
-
         return ids
 
-    def delete_user_documents(self, user_id: int) -> None:
+    def delete_user_documents(self, user_id: int, openai_api_key: str) -> None:
         """Delete all documents for a specific user"""
-        vectorstore = self._get_base_vectorstore()
+        vectorstore = self._get_base_vectorstore(openai_api_key)
 
         # Delete documents matching user_id filter
         vectorstore.delete(filter={"user_id": user_id})
 
-        self.clear_user_cache(user_id)
-
-    def clear_user_cache(self, user_id: int):
-        """Clear cached vectorstore for a user"""
-        if user_id in self._cache:
-            del self._cache[user_id]
-
-    def user_has_vectorstore(self, user_id: int) -> bool:
+    def user_has_vectorstore(self, user_id: int, openai_api_key: str) -> bool:
         """Check if a user has documents in the vectorstore"""
-        vectorstore = self._get_base_vectorstore()
+        vectorstore = self._get_base_vectorstore(openai_api_key)
 
         # Perform a search with filter to check if any docs exist
         results = vectorstore.similarity_search(
