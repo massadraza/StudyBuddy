@@ -11,7 +11,6 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 /* Public Routes: No authentication required */
 /* Protected Routes: Authentication required */
 
-
 function App() {
   return (
     <BrowserRouter>

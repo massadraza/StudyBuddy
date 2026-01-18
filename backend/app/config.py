@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     algorithm: str
     access_token_expire_minutes: int
 
-    # Database (PostgreSQL)
+    # PostgreSQL Database
     database_url: str
 
     # pgvector connection (optional, defaults to database_url)

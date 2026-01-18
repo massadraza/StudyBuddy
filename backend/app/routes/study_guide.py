@@ -4,7 +4,6 @@ from ..database import get_db
 from ..auth import get_current_user
 from ..models.database_models import User
 from ..vectorstore import vector_manager
-from ..config import settings
 import os
 from pathlib import Path
 
@@ -14,7 +13,7 @@ router = APIRouter(prefix="/study-guide", tags=["Study Guide"])
 UPLOAD_DIR = Path("uploaded_study_guides")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-
+    
 @router.get("/status")
 async def get_study_guide_status(
     current_user: User = Depends(get_current_user)
@@ -85,29 +84,29 @@ async def upload_study_guide(
         except UnicodeDecodeError:
             raise HTTPException(status_code=400, detail="File must be valid UTF-8 text")
 
-        # Import vectorstore utilities
+        # Import text splitter
         from langchain.text_splitter import RecursiveCharacterTextSplitter
-        from langchain_openai import OpenAIEmbeddings
-        from langchain_community.vectorstores import FAISS
 
         # Split text into chunks
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
-            length_function=len,
+            chunk_size=500,
+            chunk_overlap=50
         )
+
         chunks = text_splitter.split_text(text_content)
 
-        # Create embeddings and vectorstore
-        embeddings = OpenAIEmbeddings(openai_api_key=settings.openai_api_key)
-        vectorstore_path = user_dir / "vectorstore"
+        # Delete existing documents for this user (if any)
+        try:
+            vector_manager.delete_user_documents(current_user.id)
+        except Exception:
+            pass  # No existing documents to delete
 
-        # Create new vectorstore (overwrites existing)
-        vectorstore = FAISS.from_texts(chunks, embeddings)
-        vectorstore.save_local(str(vectorstore_path))
-
-        # Clear any cached vectorstore for this user
-        vector_manager.clear_user_cache(current_user.id)
+        # Add new documents with user_id metadata
+        vector_manager.add_documents_for_user(
+            user_id=current_user.id,
+            texts=chunks,
+            metadatas=[{"source": file.filename, "chunk_index": i} for i in range(len(chunks))]
+        )
 
         # Update user's has_study_guide flag
         current_user.has_study_guide = True

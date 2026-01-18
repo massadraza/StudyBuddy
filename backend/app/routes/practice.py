@@ -50,7 +50,7 @@ def generate_question(
         "new_mastery_score": 0.0,
         "chat_history": []
     })
-
+    
     # Save practice question to database (without student answer yet)
     practice_question = database_models.PracticeQuestion(
         user_id=current_user.id,
