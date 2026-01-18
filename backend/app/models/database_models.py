@@ -25,7 +25,7 @@ class User(Base):
 
 class Conversation(Base):
     __tablename__ = "conversations"
-    
+    # Every user_id in conversations must match an existing id in users - gives it the unique identity characteristic
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.now(datetime.timezone.utc))
@@ -61,6 +61,15 @@ class MasteryScore(Base):
     # Relationships
     user = relationship("User", back_populates="mastery_scores")
 
+    """
+
+    This is the repeated work that is saved by using a relationship()
+
+    scores = db.query(MasteryScore).filter(
+        MasteryScore.user_id == user.id
+    ).all()
+
+    """
 
 class PracticeQuestion(Base):
     __tablename__ = "practice_questions"
@@ -77,5 +86,5 @@ class PracticeQuestion(Base):
     
     # Relationships
     user = relationship("User", back_populates="practice_questions")
-    
+
     # relationship(NAME_OF_TABLE, NAME_OF_RELATIONSHIP_IN_TABLE)
