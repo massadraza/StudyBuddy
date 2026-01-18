@@ -67,6 +67,7 @@ def register(user_data: schemas.UserRegister, db: Session = Depends(get_db)):
     
     return new_user
 
+
 @router.post("/login", response_model=schemas.Token)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -102,6 +103,7 @@ def logout(
     current_user: database_models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    
     """Logout and clear user's chat history"""
     # Get all conversations for this user
     conversations = db.query(database_models.Conversation).filter(

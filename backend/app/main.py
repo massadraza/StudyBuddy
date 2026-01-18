@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from .config import settings
-from .database import create_tables
 from .routes import auth, chat, practice, progress, study_guide
 
 # Define lifespan context manager
@@ -11,13 +10,9 @@ async def app_lifespan(app: FastAPI):
     # Startup logic
     print("Starting StudyBuddy Application...")
 
-    # Initialize database tables
-    print("Creating database tables...")
-
-    # Creates tables if they do not exist
-    create_tables()
-
-    print("Database tables ready!")
+    # Database tables are managed by Alembic migrations
+    # Run: alembic upgrade head
+    print("Database managed by Alembic migrations")
     print("StudyBuddy API is ready!")
 
     yield  # app starts serving requests here

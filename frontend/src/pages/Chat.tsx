@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, Sparkles, LogOut, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { apiService } from '../services/api';
+import { apiService } from '../services/api'; {/* Designed to keep APIs out of UI */}
 import type { Message } from '../types';
 
 export default function Chat() {
