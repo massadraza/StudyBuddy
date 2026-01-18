@@ -60,11 +60,6 @@ class MasteryScore(Base):
     
     # Relationships
     user = relationship("User", back_populates="mastery_scores")
-    
-    # Ensure one score per user per topic
-    __table_args__ = (
-        {"sqlite_autoincrement": True},
-    )
 
 
 class PracticeQuestion(Base):
@@ -82,3 +77,5 @@ class PracticeQuestion(Base):
     
     # Relationships
     user = relationship("User", back_populates="practice_questions")
+    
+    # relationship(NAME_OF_TABLE, NAME_OF_RELATIONSHIP_IN_TABLE)
