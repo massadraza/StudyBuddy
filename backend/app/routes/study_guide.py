@@ -76,7 +76,7 @@ async def upload_study_guide(
 
     # Create user-specific directory
     user_dir = UPLOAD_DIR / str(current_user.id)
-    user_dir.mkdir(exist_ok=True)
+    user_dir.mkdir(exist_ok=True, parents=True)
 
     # Save the uploaded file
     file_path = user_dir / file.filename
