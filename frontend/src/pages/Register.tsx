@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, Sparkles, Brain, CheckCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, Sparkles, Brain} from 'lucide-react';
 import { apiService } from '../services/api';
 
 export default function Register() {
