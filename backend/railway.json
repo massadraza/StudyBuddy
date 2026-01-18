@@ -1,4 +1,11 @@
 {
-  "build": "pip install -r requirements.txt",
-  "start": "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+  "services": [
+    {
+      "name": "backend",
+      "build": {
+        "builder": "pack"
+      },
+      "start": "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    }
+  ]
 }
