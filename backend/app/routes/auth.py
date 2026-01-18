@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
+from openai import OpenAI
 from ..database import get_db
 from ..models import database_models, schemas
 from ..auth import (
@@ -10,7 +11,7 @@ from ..auth import (
     get_password_hash,
     get_current_user
 )
-
+from ..encryption import encrypt_api_key, decrypt_api_key
 from ..config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -92,10 +93,16 @@ def login(
     
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me", response_model=schemas.User)
+@router.get("/me")
 def get_current_user_info(current_user: database_models.User = Depends(get_current_user)):
     """Get current user information"""
-    return current_user
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "has_openai_key": current_user.encrypted_openai_key is not None,
+        "created_at": current_user.created_at
+    }
 
 
 @router.post("/logout")
@@ -124,3 +131,56 @@ def logout(
     db.commit()
 
     return {"message": "Logged out successfully. Chat history cleared."}
+
+
+@router.get("/api-key/status", response_model=schemas.ApiKeyStatus)
+def get_api_key_status(current_user: database_models.User = Depends(get_current_user)):
+    """Check if the user has set an OpenAI API key"""
+    return {"has_api_key": current_user.encrypted_openai_key is not None}
+
+
+@router.post("/api-key")
+def set_api_key(
+    request: schemas.ApiKeyRequest,
+    current_user: database_models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Set or update the user's OpenAI API key (validates before saving)"""
+    api_key = request.api_key.strip()
+
+    # Validate API key format
+    if not api_key.startswith("sk-"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid API key format. OpenAI keys start with 'sk-'"
+        )
+
+    # Test the API key by making a simple API call
+    try:
+        client = OpenAI(api_key=api_key)
+        # Use a minimal API call to validate the key
+        client.models.list()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid API key: {str(e)}"
+        )
+
+    # Encrypt and save the API key
+    encrypted_key = encrypt_api_key(api_key)
+    current_user.encrypted_openai_key = encrypted_key
+    db.commit()
+
+    return {"message": "API key saved successfully"}
+
+
+@router.delete("/api-key")
+def delete_api_key(
+    current_user: database_models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete the user's OpenAI API key"""
+    current_user.encrypted_openai_key = None
+    db.commit()
+
+    return {"message": "API key deleted successfully"}

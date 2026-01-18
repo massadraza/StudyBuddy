@@ -15,22 +15,16 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
 from langgraph.graph import StateGraph, END
 from sqlalchemy.orm import Session
-from .config import settings
 from .models.database_models import MasteryScore
 
 
-# Initialize LLM
-llm = ChatOpenAI(
-    model="gpt-4o-mini",
-    openai_api_key=settings.openai_api_key,
-    temperature=0
-)
-
-llm_creative = ChatOpenAI(
-    model="gpt-4o-mini",
-    openai_api_key=settings.openai_api_key,
-    temperature=0.7
-)
+def get_llm(openai_api_key: str, temperature: float = 0) -> ChatOpenAI:
+    """Get an LLM instance with the provided API key"""
+    return ChatOpenAI(
+        model="gpt-4o-mini",
+        openai_api_key=openai_api_key,
+        temperature=temperature
+    )
 
 
 class TutorState(TypedDict):
@@ -42,8 +36,9 @@ class TutorState(TypedDict):
 
     # Database context (passed in, not modified by graph)
     user_id: int
-    vectorstore: Any  # FAISS vectorstore
+    vectorstore: Any  # pgvector vectorstore
     db: Session
+    openai_api_key: str  # User's API key
 
     # Intermediate state
     retrieved_docs: List[Document]
@@ -83,6 +78,9 @@ def tutor_node(state: TutorState) -> dict:
     question = state["question"]
     docs = state["retrieved_docs"]
     chat_history = state.get("chat_history", [])
+    openai_api_key = state["openai_api_key"]
+
+    llm = get_llm(openai_api_key, temperature=0.7)
 
     context = "\n\n".join([doc.page_content for doc in docs])
 
@@ -109,7 +107,7 @@ Use the conversation history to understand references like "that", "it", "this",
         ("human", "{question}")
     ])
 
-    chain = prompt | llm_creative
+    chain = prompt | llm
     response = chain.invoke({"context": context, "question": question, "history": history_text})
 
     print(f"[Tutor] Generated response")
@@ -127,6 +125,9 @@ def question_generator_node(state: TutorState) -> dict:
     """Generates practice questions from the study material."""
     docs = state["retrieved_docs"]
     topic = state.get("current_topic", "this topic")
+    openai_api_key = state["openai_api_key"]
+
+    llm = get_llm(openai_api_key, temperature=0)
 
     print(f"[Question Generator] Creating practice question about {topic}...")
 
@@ -170,6 +171,9 @@ def evaluator_node(state: TutorState) -> dict:
     student_answer = state["student_answer"]
     correct_answer = state["correct_answer"]
     question = state["generated_question"]
+    openai_api_key = state["openai_api_key"]
+
+    llm = get_llm(openai_api_key, temperature=0)
 
     print("[Evaluator] Checking answer...")
 
@@ -219,6 +223,9 @@ def topic_extractor_node(state: TutorState) -> dict:
     """Extracts the main topic from the question and context."""
     question = state.get("question", "") or state.get("generated_question", "")
     docs = state.get("retrieved_docs", [])
+    openai_api_key = state["openai_api_key"]
+
+    llm = get_llm(openai_api_key, temperature=0)
 
     context = docs[0].page_content if docs else ""
 

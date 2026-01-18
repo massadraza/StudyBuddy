@@ -4,6 +4,7 @@ from ..database import get_db
 from ..auth import get_current_user
 from ..models.database_models import User
 from ..vectorstore import vector_manager
+from ..encryption import decrypt_api_key
 import os
 from pathlib import Path
 
@@ -13,7 +14,7 @@ router = APIRouter(prefix="/study-guide", tags=["Study Guide"])
 UPLOAD_DIR = Path("uploaded_study_guides")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-    
+
 @router.get("/status")
 async def get_study_guide_status(
     current_user: User = Depends(get_current_user)
@@ -58,9 +59,20 @@ async def upload_study_guide(
     db: Session = Depends(get_db)
 ):
     """Upload a study guide text file. The file will be vectorized for use in chat/practice."""
+
+    # Check if user has set an OpenAI API key
+    if not current_user.encrypted_openai_key:
+        raise HTTPException(
+            status_code=403,
+            detail="Please set your OpenAI API key before uploading a study guide"
+        )
+
     # Validate file type
     if not file.filename.endswith('.txt'):
         raise HTTPException(status_code=400, detail="Only .txt files are allowed")
+
+    # Decrypt the API key
+    openai_api_key = decrypt_api_key(current_user.encrypted_openai_key)
 
     # Create user-specific directory
     user_dir = UPLOAD_DIR / str(current_user.id)
@@ -97,7 +109,7 @@ async def upload_study_guide(
 
         # Delete existing documents for this user (if any)
         try:
-            vector_manager.delete_user_documents(current_user.id)
+            vector_manager.delete_user_documents(current_user.id, openai_api_key)
         except Exception:
             pass  # No existing documents to delete
 
@@ -105,6 +117,7 @@ async def upload_study_guide(
         vector_manager.add_documents_for_user(
             user_id=current_user.id,
             texts=chunks,
+            openai_api_key=openai_api_key,
             metadatas=[{"source": file.filename, "chunk_index": i} for i in range(len(chunks))]
         )
 

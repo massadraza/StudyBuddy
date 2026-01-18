@@ -15,6 +15,7 @@ class User(Base):
     full_name = Column(String, nullable=True)
     hashed_password = Column(String, nullable=False)
     has_study_guide = Column(Boolean, default=False, nullable=False)
+    encrypted_openai_key = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     # Relationships
