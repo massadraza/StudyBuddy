@@ -5,6 +5,7 @@ import Chat from './pages/Chat';
 import Practice from './pages/Practice';
 import Progress from './pages/Progress';
 import StudyGuide from './pages/StudyGuide';
+import Settings from './pages/Settings';
 import Navigation from './components/layout/Navigation';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -60,6 +61,17 @@ function App() {
               <>
                 <Navigation />
                 <StudyGuide />
+              </>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <>
+                <Navigation />
+                <Settings />
               </>
             </ProtectedRoute>
           }

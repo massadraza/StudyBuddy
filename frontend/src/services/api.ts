@@ -78,6 +78,22 @@ class ApiService {
     return response.data;
   }
 
+  // API Key endpoints
+  async getApiKeyStatus(): Promise<{ has_api_key: boolean }> {
+    const response = await this.api.get('/auth/api-key/status');
+    return response.data;
+  }
+
+  async setApiKey(apiKey: string): Promise<{ message: string }> {
+    const response = await this.api.post('/auth/api-key', { api_key: apiKey });
+    return response.data;
+  }
+
+  async deleteApiKey(): Promise<{ message: string }> {
+    const response = await this.api.delete('/auth/api-key');
+    return response.data;
+  }
+
   // Chat endpoints
   async sendMessage(chatRequest: ChatRequest): Promise<ChatResponse> {
     const response = await this.api.post<ChatResponse>('/chat', chatRequest);
