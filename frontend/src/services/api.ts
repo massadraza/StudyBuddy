@@ -96,7 +96,7 @@ class ApiService {
 
   // Chat endpoints
   async sendMessage(chatRequest: ChatRequest): Promise<ChatResponse> {
-    const response = await this.api.post<ChatResponse>('/chat', chatRequest);
+    const response = await this.api.post<ChatResponse>('/chat/', chatRequest);
     return response.data;
   }
 
