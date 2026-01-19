@@ -36,18 +36,27 @@ class StorageManager:
         # Create a unique path for the user's file
         storage_path = f"{user_id}/{filename}"
 
+        print(f"[Storage] Uploading to bucket: {self.bucket}, path: {storage_path}")
+        print(f"[Storage] Supabase URL: {settings.supabase_url}")
+        print(f"[Storage] Service key starts with: {settings.supabase_service_key[:20]}...")
+
         # Delete existing file if it exists
         try:
             self.client.storage.from_(self.bucket).remove([storage_path])
-        except Exception:
-            pass  # File doesn't exist, that's fine
+        except Exception as e:
+            print(f"[Storage] Delete existing file (ok if not found): {e}")
 
         # Upload the new file
-        self.client.storage.from_(self.bucket).upload(
-            path=storage_path,
-            file=content,
-            file_options={"content-type": "text/plain", "upsert": "true"}
-        )
+        try:
+            result = self.client.storage.from_(self.bucket).upload(
+                path=storage_path,
+                file=content,
+                file_options={"content-type": "text/plain", "upsert": "true"}
+            )
+            print(f"[Storage] Upload result: {result}")
+        except Exception as e:
+            print(f"[Storage] Upload error: {e}")
+            raise
 
         return storage_path
 
