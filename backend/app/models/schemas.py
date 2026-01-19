@@ -20,6 +20,9 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class GoogleAuthRequest(BaseModel):
+    token: str  # Google ID token from frontend
+
 class User(BaseModel):
     id: int
     email: str

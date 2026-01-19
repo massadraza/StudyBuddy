@@ -67,6 +67,11 @@ class ApiService {
     return response.data;
   }
 
+  async googleAuth(token: string): Promise<Token> {
+    const response = await this.api.post<Token>('/auth/google', { token });
+    return response.data;
+  }
+
   async getCurrentUser() {
     const response = await this.api.get('/auth/me');
     return response.data;

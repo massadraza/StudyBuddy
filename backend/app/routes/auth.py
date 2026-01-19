@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from openai import OpenAI
+import httpx
 from ..database import get_db
 from ..models import database_models, schemas
 from ..auth import (
@@ -184,3 +185,82 @@ def delete_api_key(
     db.commit()
 
     return {"message": "API key deleted successfully"}
+
+
+@router.post("/google", response_model=schemas.Token)
+async def google_auth(request: schemas.GoogleAuthRequest, db: Session = Depends(get_db)):
+    """Authenticate with Google OAuth token"""
+    if not settings.google_client_id:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Google authentication is not configured"
+        )
+
+    # Verify the Google token
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://oauth2.googleapis.com/tokeninfo?id_token={request.token}"
+            )
+
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid Google token"
+                )
+
+            google_data = response.json()
+
+            # Verify the token was issued for our app
+            if google_data.get("aud") != settings.google_client_id:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Token was not issued for this application"
+                )
+
+            email = google_data.get("email")
+            google_id = google_data.get("sub")
+            full_name = google_data.get("name")
+
+            if not email:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email not provided by Google"
+                )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Failed to verify Google token: {str(e)}"
+        )
+
+    # Check if user exists by Google ID or email
+    user = db.query(database_models.User).filter(
+        (database_models.User.google_id == google_id) |
+        (database_models.User.email == email)
+    ).first()
+
+    if user:
+        # Update Google ID if user exists but signed up with email/password
+        if not user.google_id:
+            user.google_id = google_id
+            db.commit()
+    else:
+        # Create new user
+        user = database_models.User(
+            email=email,
+            full_name=full_name,
+            google_id=google_id,
+            hashed_password=None  # No password for Google OAuth users
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    # Create access token
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": user.email},
+        expires_delta=access_token_expires
+    )
+
+    return {"access_token": access_token, "token_type": "bearer"}

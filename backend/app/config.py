@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     supabase_service_key: str
     supabase_bucket: str = "study-guides"
 
+    # Google OAuth
+    google_client_id: Optional[str] = None
+    google_client_secret: Optional[str] = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=False
