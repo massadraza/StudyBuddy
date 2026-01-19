@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Optional
 
 class Settings(BaseSettings):
@@ -19,8 +19,10 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: str
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False
+    )
 
     @property
     def cors_origins_list(self) -> List[str]:
@@ -30,6 +32,7 @@ class Settings(BaseSettings):
     def vector_connection(self) -> str:
         """Return pgvector connection, defaulting to database_url if not set"""
         return self.pgvector_connection or self.database_url
-
+    
+    
 # Create a single instance so it is only loaded once
 settings = Settings()
