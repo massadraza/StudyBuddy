@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-
 from .config import settings
 from .routes import auth, chat, practice, progress, study_guide
 
@@ -26,11 +25,10 @@ app = FastAPI(
     lifespan=app_lifespan
 )
 
-
 # Configure CORS -- Security Protocols
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://study-buddy-two-dusky.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
