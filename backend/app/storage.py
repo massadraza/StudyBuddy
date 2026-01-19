@@ -1,19 +1,25 @@
 """Supabase Storage client for study guide file storage."""
+from typing import Optional
 from supabase import create_client, Client
 from .config import settings
-
-
-def get_supabase_client() -> Client:
-    """Create and return a Supabase client."""
-    return create_client(settings.supabase_url, settings.supabase_service_key)
 
 
 class StorageManager:
     """Manages file storage in Supabase Storage."""
 
     def __init__(self):
-        self.client = get_supabase_client()
-        self.bucket = settings.supabase_bucket
+        self._client: Optional[Client] = None
+
+    @property
+    def client(self) -> Client:
+        """Lazy initialization of Supabase client."""
+        if self._client is None:
+            self._client = create_client(settings.supabase_url, settings.supabase_service_key)
+        return self._client
+
+    @property
+    def bucket(self) -> str:
+        return settings.supabase_bucket
 
     def upload_file(self, user_id: int, filename: str, content: bytes) -> str:
         """
@@ -114,5 +120,5 @@ class StorageManager:
             pass
 
 
-# Create a singleton instance
+# Create a singleton instance (client is lazily initialized)
 storage_manager = StorageManager()
