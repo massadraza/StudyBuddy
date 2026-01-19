@@ -252,17 +252,22 @@ export default function Chat() {
               </button>
             </div>
           )}
+          {hasStudyGuide === null && (
+            <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+              <p className="text-gray-600">Checking study guide status...</p>
+            </div>
+          )}
           <div className="flex gap-3">
             <div className="flex-1 relative">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={hasStudyGuide === false ? "Upload a study guide to start..." : "Ask me anything..."}
+                placeholder={hasStudyGuide !== true ? "Upload a study guide to start..." : "Ask me anything..."}
                 rows={1}
-                disabled={hasStudyGuide === false}
+                disabled={hasStudyGuide !== true}
                 className={`w-full px-5 py-4 pr-12 border rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none shadow-sm ${
-                  hasStudyGuide === false
+                  hasStudyGuide !== true
                     ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
                     : 'bg-white border-gray-200'
                 }`}
@@ -270,10 +275,10 @@ export default function Chat() {
               />
             </div>
             <motion.button
-              whileHover={{ scale: hasStudyGuide === false ? 1 : 1.05 }}
-              whileTap={{ scale: hasStudyGuide === false ? 1 : 0.95 }}
+              whileHover={{ scale: hasStudyGuide !== true ? 1 : 1.05 }}
+              whileTap={{ scale: hasStudyGuide !== true ? 1 : 0.95 }}
               onClick={handleSend}
-              disabled={!input.trim() || loading || hasStudyGuide === false}
+              disabled={!input.trim() || loading || hasStudyGuide !== true}
               className="px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
             >
               <Send size={20} />
