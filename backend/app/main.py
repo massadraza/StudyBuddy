@@ -31,7 +31,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://independent-illumination-production-4d0f.up.railway.app",
+        "https://study-buddy-two-dusky.vercel.app",
         "http://localhost:5173"
     ],    
     allow_credentials=True,
