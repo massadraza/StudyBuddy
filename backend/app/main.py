@@ -34,7 +34,10 @@ app = FastAPI(
 # Configure CORS -- Security Protocols
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    allow_origins=[
+        "https://independent-illumination-production-4d0f.up.railway.app",
+        "http://localhost:5173"
+    ],    
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
