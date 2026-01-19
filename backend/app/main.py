@@ -22,7 +22,7 @@ async def app_lifespan(app: FastAPI):
 app = FastAPI(
     title="StudyBuddy API",
     description="Full Stack Application Powered by LangChain/LangGraph",
-    version="1.1.1",
+    version="1.2.1",
     lifespan=app_lifespan
 )
 
