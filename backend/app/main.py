@@ -11,10 +11,6 @@ from .routes import auth, chat, practice, progress, study_guide
 async def app_lifespan(app: FastAPI):
     # Startup logic
     print("Starting StudyBuddy Application...")
-
-    # Database tables are managed by Alembic migrations
-    # Run: alembic upgrade head
-    print("Database managed by Alembic migrations")
     print("StudyBuddy API is ready!")
 
     yield  # app starts serving requests here
@@ -43,8 +39,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# Include routers
 app.include_router(auth.router)
 app.include_router(chat.router)
 app.include_router(practice.router)
