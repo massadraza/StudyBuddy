@@ -3,7 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from .config import settings
 from .routes import auth, chat, practice, progress, study_guide
+from app.database import engine
+from app.models.database_models import Base
 
+Base.metadata.create_all(bind=engine)
 
 # Define lifespan context manager
 @asynccontextmanager
