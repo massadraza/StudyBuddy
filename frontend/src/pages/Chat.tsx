@@ -93,13 +93,6 @@ export default function Chat() {
     navigate('/login');
   };
 
-  const suggestedQuestions = [
-    "Explain quantum mechanics in simple terms",
-    "Help me solve a calculus problem",
-    "What are the main causes of World War II?",
-    "Teach me about photosynthesis"
-  ];
-
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Header */}
@@ -159,25 +152,7 @@ export default function Chat() {
               <p className="text-gray-600 mb-8 text-center max-w-md">
                 Your personal AI tutor is ready to help you learn anything. Ask a question to get started!
               </p>
-
-              {/* Suggested Questions */}
-              <div className="w-full max-w-2xl">
-                <p className="text-sm font-medium text-gray-700 mb-3">Try asking:</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {suggestedQuestions.map((question, index) => (
-                    <motion.button
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      onClick={() => setInput(question)}
-                      className="text-left p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all group"
-                    >
-                      <p className="text-sm text-gray-700 group-hover:text-blue-600">{question}</p>
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
+              
             </motion.div>
           ) : (
             <AnimatePresence>

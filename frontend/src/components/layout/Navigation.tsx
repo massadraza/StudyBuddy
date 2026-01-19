@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 
+{/* Navigation Bar */}
 export default function Navigation() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -10,6 +11,7 @@ export default function Navigation() {
     navigate('/login');
   };
 
+  {/* Color Shadowing Rule */}
   const isActive = (path: string) => location.pathname === path;
 
   return (
