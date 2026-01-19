@@ -33,6 +33,9 @@ wheels/
 *.faiss
 *.pkl
 
+# Uploaded files (now using Supabase Storage)
+uploaded_study_guides/
+
 # IDE
 .vscode/
 .idea/
