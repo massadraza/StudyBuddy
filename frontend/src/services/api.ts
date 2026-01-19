@@ -113,7 +113,7 @@ class ApiService {
 
   // Progress endpoints
   async getProgress(): Promise<ProgressResponse> {
-    const response = await this.api.get<ProgressResponse>('/progress');
+    const response = await this.api.get<ProgressResponse>('/progress/');
     return response.data;
   }
 
