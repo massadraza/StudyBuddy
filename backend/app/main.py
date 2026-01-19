@@ -17,7 +17,7 @@ async def app_lifespan(app: FastAPI):
 
     # ✅ AUTO CREATE TABLES
     Base.metadata.create_all(bind=engine)
-
+    print("DB URL:", settings.database_url)
     print("Database managed by Alembic migrations")
     print("StudyBuddy API is ready!")
 
