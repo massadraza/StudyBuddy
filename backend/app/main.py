@@ -25,7 +25,8 @@ app = FastAPI(
     title="StudyBuddy API",
     description="Full Stack Application Powered by LangChain/LangGraph",
     version="1.2.1",
-    lifespan=app_lifespan
+    lifespan=app_lifespan,
+    redirect_slashes=False  # Prevent 307 redirects for trailing slashes
 )
 
 # Configure CORS -- Security Protocols

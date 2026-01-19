@@ -10,7 +10,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
-@router.post("/", response_model=schemas.ChatResponse)
+@router.post("", response_model=schemas.ChatResponse)
 def chat(
     request: schemas.ChatRequest,
     current_user: database_models.User = Depends(get_current_user),

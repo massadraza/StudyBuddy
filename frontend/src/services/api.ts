@@ -96,7 +96,7 @@ class ApiService {
 
   // Chat endpoints
   async sendMessage(chatRequest: ChatRequest): Promise<ChatResponse> {
-    const response = await this.api.post<ChatResponse>('/chat/', chatRequest);
+    const response = await this.api.post<ChatResponse>('/chat', chatRequest);
     return response.data;
   }
 
@@ -113,7 +113,7 @@ class ApiService {
 
   // Progress endpoints
   async getProgress(): Promise<ProgressResponse> {
-    const response = await this.api.get<ProgressResponse>('/progress/');
+    const response = await this.api.get<ProgressResponse>('/progress');
     return response.data;
   }
 

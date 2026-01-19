@@ -10,7 +10,7 @@ router = APIRouter(prefix="/progress", tags=["Progress"])
 # Depends()
 # Runs those functions before the router function is executed
 
-@router.get("/", response_model=schemas.ProgressResponse)
+@router.get("", response_model=schemas.ProgressResponse)
 def get_progress(
     current_user: database_models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
