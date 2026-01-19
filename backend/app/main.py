@@ -4,14 +4,20 @@ from contextlib import asynccontextmanager
 from .config import settings
 from .routes import auth, chat, practice, progress, study_guide
 
+# ADD THESE
+from .database import engine
+from .models.database_models import Base
+
+
 # Define lifespan context manager
 @asynccontextmanager
 async def app_lifespan(app: FastAPI):
     # Startup logic
     print("Starting StudyBuddy Application...")
 
-    # Database tables are managed by Alembic migrations
-    # Run: alembic upgrade head
+    # ✅ AUTO CREATE TABLES
+    Base.metadata.create_all(bind=engine)
+
     print("Database managed by Alembic migrations")
     print("StudyBuddy API is ready!")
 
@@ -26,28 +32,3 @@ app = FastAPI(
     version="1.1.1",
     lifespan=app_lifespan
 )
-
-# Configure CORS -- Security Protocols
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Include routers 
-app.include_router(auth.router) 
-app.include_router(chat.router)
-app.include_router(practice.router)
-app.include_router(progress.router)
-app.include_router(study_guide.router)
-
-# Health check endpoint - local testing purposes
-@app.get("/")
-def read_root():
-    return {
-        "message": "Welcome to StudyBuddy API",
-        "version": "1.0.0",
-        "status": "healthy"
-    }
