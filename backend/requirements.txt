@@ -19,4 +19,4 @@ langgraph==0.2.59
 psycopg2-binary
 python-dotenv==1.0.1
 openai==1.58.1
-alembic
+supabase==2.10.0

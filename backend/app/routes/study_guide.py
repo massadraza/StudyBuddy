@@ -5,14 +5,9 @@ from ..auth import get_current_user
 from ..models.database_models import User
 from ..vectorstore import vector_manager
 from ..encryption import decrypt_api_key
-import os
-from pathlib import Path
+from ..storage import storage_manager
 
 router = APIRouter(prefix="/study-guide", tags=["Study Guide"])
-
-# Directory to store uploaded study guides
-UPLOAD_DIR = Path("uploaded_study_guides")
-UPLOAD_DIR.mkdir(exist_ok=True)
 
 
 @router.get("/status")
@@ -20,28 +15,17 @@ async def get_study_guide_status(
     current_user: User = Depends(get_current_user)
 ):
     """Check if the current user has uploaded a study guide and return file info."""
-    user_dir = UPLOAD_DIR / str(current_user.id)
-
-    # Find the uploaded study guide file (if any)
     filename = None
     file_size = None
     word_count = None
 
-    if current_user.has_study_guide and user_dir.exists():
-        # Look for .txt files in user directory
-        txt_files = list(user_dir.glob("*.txt"))
-        if txt_files:
-            study_file = txt_files[0]  # Get the first (should be only) txt file
-            filename = study_file.name
-            file_size = study_file.stat().st_size
-
-            # Read file to get word count
-            try:
-                with open(study_file, "r", encoding="utf-8") as f:
-                    content = f.read()
-                    word_count = len(content.split())
-            except Exception:
-                word_count = None
+    if current_user.has_study_guide:
+        # Get file info from Supabase Storage
+        file_info = storage_manager.get_file_info(current_user.id)
+        if file_info:
+            filename = file_info["filename"]
+            file_size = file_info["file_size"]
+            word_count = file_info["word_count"]
 
     return {
         "has_study_guide": current_user.has_study_guide,
@@ -74,20 +58,9 @@ async def upload_study_guide(
     # Decrypt the API key
     openai_api_key = decrypt_api_key(current_user.encrypted_openai_key)
 
-    # Create user-specific directory
-    user_dir = UPLOAD_DIR / str(current_user.id)
-    user_dir.mkdir(exist_ok=True, parents=True)
-
-    # Save the uploaded file
-    file_path = user_dir / file.filename
-
     try:
-        # Read and save file content
+        # Read file content
         content = await file.read()
-
-        # Save to disk
-        with open(file_path, 'wb') as f:
-            f.write(content)
 
         # Decode and validate text
         try:
@@ -95,6 +68,9 @@ async def upload_study_guide(
             word_count = len(text_content.split())
         except UnicodeDecodeError:
             raise HTTPException(status_code=400, detail="File must be valid UTF-8 text")
+
+        # Upload to Supabase Storage
+        storage_manager.upload_file(current_user.id, file.filename, content)
 
         # Import text splitter
         from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -135,7 +111,4 @@ async def upload_study_guide(
     except HTTPException:
         raise
     except Exception as e:
-        # Clean up the file if processing failed
-        if file_path.exists():
-            os.remove(file_path)
         raise HTTPException(status_code=500, detail=f"Failed to process study guide: {str(e)}")

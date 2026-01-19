@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: str
 
+    # Supabase Storage
+    supabase_url: str
+    supabase_service_key: str
+    supabase_bucket: str = "study-guides"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=False
